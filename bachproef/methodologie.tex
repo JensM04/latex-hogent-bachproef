@@ -26,6 +26,175 @@
 %% Maak voor elke fase (behalve het literatuuronderzoek) een NIEUW HOOFDSTUK aan
 %% en geef het een gepaste titel.
 
-Nu we weten dat navigeren op een kerkhof vaak traag of verwarrend is en zelfs met hedendaagse applicaties nog andere zorgen met zich brengt, is het doel concreet om een Proof of Concept op te stellen met als oplossing Augmented Reality(AR) te gebruiken samen met een geoloket als een mobiele applicatie. Het kerkhof van Sint-Gillis-Waas is relatief klein en heeft nog geen publieke applicatie. Hierop kan een geoloket gemaakt worden met een basis AR-overlay die de route aantoont via de mobiele camera. Er kan eventueel echte data gebruikt worden, want de privé applicatie WebBGP gebruikt deze al. Zo niet kan er een kleine dataset aangemaakt worden met mockdata. Deze toepassing wordt enkel gemaakt voor mobiele Ios apparaten. Er wordt geprogrammeerd in Swift. Hierdoor kan er gebruik gemaakt worden van ARKit voor positionele tracking en alle AR zaken. Wanneer de gebruiker zijn gewenste persoon heeft ingevoerd door bepaalde filters (naam, rijksregisternummer, ...) wordt er een bestemming klaargezet. De gebruiker kan snel switchen tussen de camera met de AR functie, of de kaart met een navigatielijn naar de bestemming. We maken dus degelijk gebruik van Augmented Reality door een effectieve pijl en navigatielijn naar de gewenste grafsteen in de omgeving van de gebruiker te brengen die zichtbaar is door de camera van het mobiele apparaat. Als de gebruiker hierdoor rond de omgeving kijkt is het zeer duidelijk waar hij naartoe moet wandelen, ook al is het kerkhof zeer groot of zijn er slechte weersomstandigheden, wat 1 van de factoren was bij een vermoeiend bezoek. \Autocite{Haekkilae2022}. Dit prototype kan getest worden, hiervoor zijn er een aantal succescriteria waarop we kunnen letten: gebruiker maakt X aantal navigatiefouten, ervaart de gebruiker moeite of stress tijdens gebruik, met gebruik van AR is het X aantal \% sneller dan zonder AR, hoe stabiel is de AR, ... Voor dat we het volledige project uitwerken is het maken van een risicoanalyse zeer cruciaal. Belangrijk bij Augmented Reality zijn bepaalde obstakels, hoogteverschillen, het weer of licht die de tracking kan beïnvloeden. Gebruikers die niet vertrouwd zijn met AR moeten nog steeds gebruik kunnen maken van de app zonder enige problemen. Er wordt geen effectieve integratie met de kerkhofadministratie of gemeente verwerkt, enkel een Proof of Concept die eventueel gebruik kan maken van hun data. Als evaluatiemethode vergelijken we verschillende situaties van de bezoeker: geen gebruik van applicatie, gebruik van applicatie zonder AR, gebruik van applicatie met AR. Bij elke test wordt er een technische evaluatie aan gekoppeld om te zien hoe stabiel en hulpvol de Augmented Reality kan zijn. Op Figuur 1 kan de concrete workflow gezien worden. De volgorde is hier cruciaal. De datums zijn een schatting van hoe lang elk deel zou kunnen innemen. Deze zijn dus niet definitief.
+\chapter{\IfLanguageName{dutch}{Methodologie}{Methodology}}%
+\label{ch:methodologie}
+
+In dit hoofdstuk wordt de onderzoeksaanpak beschreven. Vertrekkende vanuit de probleemstelling en de bevindingen uit de literatuurstudie, wordt stap voor stap uiteengezet hoe het proof of concept wordt opgebouwd, getest en geëvalueerd. De methodologie is opgesplitst in vijf grote fasen: een voorbereidingsfase, een ontwerpfase, een implementatiefase, een testfase en een evaluatiefase. Elke fase bouwt voort op de vorige en draagt bij aan het beantwoorden van de centrale onderzoeksvraag: \textit{Op welke manier kan digitalisatie, in combinatie met Augmented Reality, worden ingezet om de efficiëntie van het navigeren op een kerkhof te verbeteren?}
+
+\section{Fase 1: Voorbereiding en analyse}
+
+\subsection{Risicoanalyse}
+
+Voorafgaand aan de ontwikkeling wordt een grondige risicoanalyse uitgevoerd. Zoals aangetoond in de literatuurstudie, brengt het gebruik van Augmented Reality in buitenomgevingen specifieke uitdagingen met zich mee \autocite{Zhao2025}. De volgende risico's worden in kaart gebracht en beoordeeld op kans en impact:
+
+\begin{itemize}
+    \item \textbf{Technische risico's:} trackingfouten door slechte belichting of weersinvloeden, GPS-onnauwkeurigheid op kleine schaal, compatibiliteitsproblemen tussen ARKit-versies.
+    \item \textbf{Gebruiksrisico's:} beperkte vertrouwdheid van oudere gebruikers met AR-technologie, veiligheidsrisico's door verminderde aandacht voor de fysieke omgeving.
+    \item \textbf{Contextrisico's:} respectvolle omgang met de emotioneel gevoelige omgeving van een begraafplaats, privacywetgeving rond persoonsgegevens van overledenen.
+    \item \textbf{Projectrisico's:} tijdsdruk, beperkte toegang tot reële data van de gemeente Sint-Gillis-Waas, afhankelijkheid van externe systemen zoals WebBGP.
+\end{itemize}
+
+Per risico worden mitigerende maatregelen geformuleerd. Zo worden fallback-mechanismen voorzien wanneer AR niet beschikbaar of stabiel is, en wordt de applicatie ontworpen met een duidelijke schakeloptie tussen de kaartweergave en de AR-modus.
+
+\subsection{Dataverzameling}
+
+Een essentieel onderdeel van de voorbereiding is het verzamelen van de benodigde data over het kerkhof van Sint-Gillis-Waas. In eerste instantie wordt onderzocht of er toegang verkregen kan worden tot de bestaande data uit de privéapplicatie WebBGP, die door de gemeente reeds gebruikt wordt voor het intern beheer van begraafplaatsen. Indien deze data beschikbaar gesteld worden, kunnen echte graflocaties, namen en rijksregisternummers gebruikt worden als invoer voor het proof of concept.
+
+Indien toegang tot reële data niet haalbaar blijkt, wordt een representatieve mockdataset aangemaakt. Deze dataset bevat een gesimuleerde plattegrond van het kerkhof, met daarin een beperkt aantal graflocaties voorzien van fictieve persoonsgegevens. De dataset wordt opgesteld in een gestandaardiseerd formaat dat compatibel is met de gebruikte geoloket-technologie en met de AR-navigatielaag.
+
+\subsection{Analyse van de testlocatie}
+
+De fysieke eigenschappen van het kerkhof van Sint-Gillis-Waas worden in kaart gebracht. Hierbij wordt aandacht besteed aan de indeling van percelen, hoogteverschillen op het terrein, de aanwezigheid van obstakels (bomen, muren, monumenten), de kwaliteit van het GPS-signaal op de locatie en de beschikbaarheid van visuele ankerpunten die nuttig kunnen zijn voor AR-tracking. Deze terreinanalyse vormt de basis voor het ontwerp van de navigatielogica en het AR-systeem.
+
+\section{Fase 2: Ontwerp van de applicatie}
+
+\subsection{Architectuur}
+
+De applicatie wordt opgebouwd als een native iOS-applicatie, geprogrammeerd in Swift. De keuze voor Swift en het bijhorende ARKit-framework is ingegeven door de rijke mogelijkheden voor positionele tracking, de integratie met de iPhone-camera en de stabiele ondersteuning van Apple voor AR-toepassingen in buitenomgevingen.
+
+De applicatie bestaat conceptueel uit twee hoofdcomponenten die de gebruiker zelf kan activeren:
+
+\begin{enumerate}
+    \item \textbf{De kaartweergave:} een interactieve plattegrond van het kerkhof waarop de locatie van het gezochte graf en de huidige positie van de gebruiker worden weergegeven, aangevuld met een navigatielijn.
+    \item \textbf{De AR-weergave:} een cameragestuurde weergave waarbij een virtuele navigatiepijl en -lijn over het reële beeld van de omgeving worden geprojecteerd, zodat de gebruiker visueel naar het gewenste graf wordt geleid.
+\end{enumerate}
+
+\subsection{Gebruikersinterface en -flow}
+
+Het ontwerp van de interface vertrekt vanuit de principes van gebruiksvriendelijkheid en toegankelijkheid. Gegeven dat de doelgroep breed is, inclusief oudere bezoekers die minder vertrouwd zijn met smartphones, wordt de interface zo eenvoudig en intuïtief mogelijk gehouden \autocite{Haekkilae2022}.
+
+De gebruikersstroom verloopt als volgt:
+
+\begin{enumerate}
+    \item De gebruiker opent de applicatie en krijgt een zoekscherm te zien.
+    \item Via filters (naam, voornaam, geboortejaar, rijksregisternummer) zoekt de gebruiker een specifiek graf op.
+    \item Na selectie wordt de bestemming ingesteld en kan de gebruiker kiezen tussen de kaartweergave of de AR-weergave.
+    \item Tijdens de navigatie kan de gebruiker op elk moment wisselen tussen beide weergaven via een duidelijk zichtbare knop.
+    \item Bij het bereiken van de bestemming wordt dit bevestigd via een visuele melding.
+\end{enumerate}
+
+\subsection{AR-navigatielogica}
+
+De AR-component maakt gebruik van ARKit voor de positionele tracking van de gebruiker. De combinatie van GPS-coördinaten en de sensoren van het toestel (versnellingsmeter, gyroscoop, camera) laat toe om de oriëntatie van de gebruiker in de ruimte te bepalen en virtuele objecten correct in het camerabeeld te positioneren.
+
+Er wordt een navigatiepijl ontwikkeld die dynamisch meebeweegt met de oriëntatie van de gebruiker en steeds wijst in de richting van de bestemming. Daarnaast wordt een virtuele lijn op de grond geprojecteerd die de optimale looproute aangeeft. Er wordt onderzocht of het weer effectief een probleem kan veroorzaken tijdens het gebruik van de app. Wanneer AR-tracking instabiel is, bijvoorbeeld bij hevige bewolking, laag licht of te grote afstand tot het doel, kunnen we bepaalde oplossingen voorzien: de app kan zich automatisch overschakelen naar een vereenvoudigde pijlweergave of kan de gebruiker vragen om over te schakelen naar de kaartweergave. 
+
+\section{Fase 3 Juridische en ethische analyse}
+
+\subsection{Context en relevantie}
+
+Naast de technische en functionele aspecten van het proof of concept, is het noodzakelijk om rekening te houden met de juridische en ethische implicaties van het gebruik van persoonsgegevens binnen de applicatie. In het bijzonder is dit relevant omdat de applicatie gegevens verwerkt die gelinkt zijn aan identificeerbare personen, zoals namen, geboortedata en overlijdensdata.
+
+Binnen de Europese context valt dit onder de regelgeving van de General Data Protection Regulation (GDPR), die strikte richtlijnen oplegt rond het verzamelen, verwerken en opslaan van persoonsgegevens.
+
+\subsection{Analyse van persoonsgegevens}
+
+In deze fase wordt onderzocht welke gegevens effectief als persoonsgegevens beschouwd worden binnen het kader van de applicatie. Hoewel het hier gaat om gegevens van overledenen, kunnen deze in bepaalde gevallen nog steeds indirect gelinkt worden aan levende personen, zoals familieleden. Hierdoor kan de verwerking van deze data alsnog onder de GDPR vallen.
+
+Er wordt een onderscheid gemaakt tussen:
+\begin{itemize}
+    \item \textbf{Directe identificatiegegevens:} naam, voornaam
+    \item \textbf{Indirecte identificatiegegevens:} locatie van het graf, familieverbanden
+    \item \textbf{Gevoelige context:} emotionele en respectvolle omgeving van een begraafplaats
+\end{itemize}
+
+\subsection{GDPR en wettelijke beperkingen}
+
+Er wordt nagegaan in welke mate de GDPR van toepassing is op de verwerking van deze data. Hierbij worden volgende principes onderzocht:
+
+\begin{itemize}
+    \item \textbf{Doelbinding:} data mag enkel gebruikt worden voor een duidelijk omschreven doel (namelijk navigatie naar graven)
+    \item \textbf{Dataminimalisatie:} enkel noodzakelijke gegevens worden verwerkt
+    \item \textbf{Transparantie:} gebruikers moeten geïnformeerd worden over het gebruik van data
+    \item \textbf{Beveiliging:} gegevens moeten beschermd worden tegen ongeautoriseerde toegang
+\end{itemize}
+
+Daarnaast wordt onderzocht in welke mate toestemming vereist is, en of de gemeente als data-eigenaar een rol speelt als verwerkingsverantwoordelijke.
+
+\subsection{Toepassing binnen het proof of concept}
+
+Aangezien dit onderzoek zich beperkt tot een proof of concept, wordt ervoor gekozen om:
+\begin{itemize}
+    \item gebruik te maken van mockdata of geanonimiseerde data
+    \item geen echte rijksregisternummers of gevoelige informatie op te slaan
+    \item geen data extern te delen of op te slaan buiten de applicatie
+\end{itemize}
+
+Hierdoor wordt het risico op schending van privacywetgeving geminimaliseerd.
+
+\subsection{Implicaties voor een productieomgeving}
+
+Voor een toekomstige implementatie in een reële context (bijvoorbeeld binnen de gemeente Sint-Gillis-Waas), worden bijkomende vereisten geïdentificeerd:
+
+\begin{itemize}
+    \item samenwerking met de gemeente als data-eigenaar
+    \item opstellen van een privacybeleid
+    \item mogelijk uitvoeren van een Data Protection Impact Assessment (DPIA)
+    \item implementatie van toegangsbeheer en beveiligingsmechanismen
+\end{itemize}
+
+Deze analyse vormt een belangrijke basis om te evalueren of het proof of concept niet alleen technisch haalbaar is, maar ook juridisch en ethisch verantwoord kan worden opgeschaald.
+
+\section{Fase 4 Implementatie}
+
+De implementatiefase volgt de eerder opgestelde architectuur en UI. De ontwikkeling verloopt iteratief: eerst wordt een basisversie gebouwd met werkende navigatie op de kaart, vervolgens wordt de AR-laag daarbovenop geïntegreerd. Dit maakt het mogelijk om tussendoor te testen en bij te sturen.
+
+De voornaamste technische componenten die worden geïmplementeerd zijn:
+
+\begin{itemize}
+    \item \textbf{Zoek- en filtermodule:} koppeling met de dataset, query-logica en weergave van zoekresultaten.
+    \item \textbf{Geoloket-integratie:} weergave van een kaart met perceelgrenzen, graflocaties en een routelijn op basis van de huidige locatie van de gebruiker.
+    \item \textbf{AR-module:} implementatie van ARKit-sessie, plaatsing van virtuele navigatiepijl en -lijn, kalibratie met GPS-coördinaten.
+    \item \textbf{Schakellogica:} naadloze overgang tussen kaartweergave en AR-weergave met behoud van de ingestelde bestemming.
+    \item \textbf{Foutafhandeling:} meldingen bij zwak GPS-signaal, AR-trackingfouten of ontbrekende data.
+\end{itemize}
+
+\section{Fase 5: Testen}
+
+\subsection{Testopzet}
+
+Na de implementatie wordt het proof of concept getest met een aantal testgebruikers op het kerkhof van Sint-Gillis-Waas. De testgroep wordt idealiter samengesteld uit personen van verschillende leeftijden en met variërende ervaring met smartphones en AR, om een breed beeld te krijgen van de gebruikerservaring.
+
+Er worden drie testscenario's gedefinieerd, die elk afzonderlijk worden doorlopen door de testpersonen:
+
+\begin{enumerate}
+    \item \textbf{Scenario A — Geen applicatie:} de gebruiker navigeert naar een aangewezen graf zonder enige digitale hulp, enkel op basis van een papieren plattegrond of mondelinge aanwijzingen.
+    \item \textbf{Scenario B — Kaartweergave zonder AR:} de gebruiker maakt gebruik van de digitale kaartweergave in de applicatie, zonder de AR-functie te activeren.
+    \item \textbf{Scenario C — Kaartweergave met AR:} de gebruiker maakt volledig gebruik van de applicatie, inclusief de AR-navigatiefunctie.
+\end{enumerate}
+
+\subsection{Meetindicatoren}
+
+Per testscenario worden de volgende kwantitatieve en kwalitatieve indicatoren gemeten:
+
+\begin{itemize}
+    \item \textbf{Navigatieprecisie:} het aantal foute richtingsveranderingen of afwijkingen van de optimale route.
+    \item \textbf{Tijdsduur:} de tijd (in seconden) die nodig is om de bestemming te bereiken.
+    \item \textbf{Gebruiksvriendelijkheid}
+    \item \textbf{AR-stabiliteit:} technische logging van trackingfouten, herinitialisaties en afwijkingen tussen de virtuele pijl en de werkelijke richting.
+    \item \textbf{Subjectieve voorkeur:} welk scenario ervaart de gebruiker als meest aangenaam en efficiënt?
+\end{itemize}
+
+\subsection{Technische evaluatie}
+
+Naast de gebruikerstests wordt een technische evaluatie uitgevoerd om de prestaties van het AR-systeem objectief te beoordelen. Hierbij wordt gekeken naar de nauwkeurigheid van de GPS-positionering, de stabiliteit van de ARKit-tracking onder verschillende licht- en weersomstandigheden, de reactiesnelheid van de AR-overlay bij beweging van de gebruiker en eventueel andere details zoals het batterijverbruik van de applicatie.
+
+\section{Fase 6: Analyse en evaluatie}
+
+De resultaten van de gebruikerstests en de technische evaluatie worden verwerkt en geanalyseerd. Kwantitatieve data (tijden, foutentelling, technische logs) worden statistisch vergeleken over de drie scenario's. Kwalitatieve data uit de testen en eventuele observaties worden gecodeerd en geïnterpreteerd.
+
+Op basis van deze analyse wordt de centrale onderzoeksvraag beantwoord: levert de combinatie van digitalisatie en Augmented Reality een meetbare verbetering op in de efficiëntie en beleving van navigatie op een kerkhof? Tegelijkertijd worden de beperkingen van het proof of concept geïdentificeerd en worden aanbevelingen geformuleerd voor een eventuele verdere doorontwikkeling.
+
+Het proof of concept wordt tot slot beoordeeld op zijn haalbaarheid als reële oplossing voor de gemeente Sint-Gillis-Waas, met inachtneming van de technische, organisatorische en ethische voorwaarden die in de risicoanalyse werden geïdentificeerd.
 
 %TODO

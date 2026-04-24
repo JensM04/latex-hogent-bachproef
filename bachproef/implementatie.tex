@@ -1,0 +1,150 @@
+\chapter{Implementatie}
+
+Dit hoofdstuk beschrijft de concrete uitwerking van het proof of concept dat werd ontwikkeld in het kader van dit onderzoek. Zoals uiteengezet in de methodologie, werd de implementatie stapsgewijs opgebouwd: eerst een werkende basisstructuur, vervolgens de integratie van de AR-laag. Dit hoofdstuk volgt die logische opbouw en documenteert per component de technische keuzes, de implementatiedetails en de aansluiting op de in de literatuurstudie beschreven vereisten.
+
+\section{Technische omgeving en tools}
+
+De applicatie werd ontwikkeld als een native iOS-applicatie in de programmeertaal Swift (versie 5.9), binnen de ontwikkelomgeving Xcode 15. De keuze voor een native iOS-oplossing is gemotiveerd door de rijke ondersteuning van Apple voor AR-toepassingen via het ARKit-framework, de stabiele integratie met de hardware van de iPhone (camera, GPS, gyroscoop, versnellingsmeter) en de betere prestatiegaranties in vergelijking met cross-platform alternatieven.
+
+De voornaamste frameworks die gebruikt worden, zijn:
+
+\begin{itemize}
+    \item \textbf{ARKit} – Apple’s framework voor augmented reality op iOS.
+    \item \textbf{SceneKit} – 3D-renderingframework voor AR-objecten.
+    \item \textbf{MapKit} – kaartweergave en annotaties.
+    \item \textbf{CoreLocation} – GPS en kompasrichting.
+    \item \textbf{Combine} – reactief programmeerframework.
+\end{itemize}
+
+De applicatie maakt gebruik van het SwiftUI app lifecycle-model, gecombineerd met UIKit via een bridge.
+
+\section{Softwarearchitectuur}
+
+De architectuur volgt het principe van \textit{separation of concerns} en het Repository-patroon.
+
+\subsection{Datamodellen}
+
+Het centrale model is \texttt{GraveRecord}, een structuur met grafgegevens zoals naam, coördinaten en metadata.
+
+Daarnaast wordt \texttt{ARNavigationState} gebruikt als \texttt{ObservableObject} voor de navigatiestatus.
+
+De bearing-berekening gebeurt via:
+
+\begin{verbatim}
+    y = sin(Δlon) × cos(lat2)
+    x = cos(lat1) × sin(lat2) − sin(lat1) × cos(lat2) × cos(Δlon)
+    bearing = atan2(y, x)
+\end{verbatim}
+
+\subsection{Dataservice}
+
+De dataservice volgt het Repository-patroon en leest JSON-data in via asynchrone verwerking. Zoekfunctionaliteit gebeurt via case-insensitieve matching.
+
+\subsection{Locatieservice}
+
+De LocationManager levert GPS- en headingdata met hoge nauwkeurigheid en werkt met delegates.
+
+\section{De AR-component}
+
+\subsection{ARKit-configuratie}
+
+De applicatie gebruikt \texttt{ARWorldTrackingConfiguration} met:
+
+\begin{itemize}
+    \item worldAlignment = gravityAndHeading
+    \item horizontale vlakdetectie
+\end{itemize}
+
+\subsection{GPS naar AR-coördinaten}
+
+De omzetting gebeurt via:
+
+\[
+X = \Delta lon \times 111.320 \times \cos(lat) \times 1000
+\]
+\[
+Z = -\Delta lat \times 111.320 \times 1000
+\]
+
+\subsection{Navigatiepijl}
+
+De pijl wordt als 3D-object opgebouwd en per frame geüpdatet.
+
+Rotatie gebeurt via:
+
+\[
+\theta = \text{atan2}(dx, dz)
+\]
+
+\subsection{Grafmarker}
+
+Bestaat uit:
+
+\begin{itemize}
+    \item Roterende kubus
+    \item Verticale lichtbalk
+    \item Pulserende grondring
+    \item Billboard-label
+\end{itemize}
+
+\section{UI-componenten}
+
+\subsection{ViewController}
+
+Centrale controller met volgende lagen:
+
+\begin{enumerate}
+    \item AR-weergave
+    \item Minikaart
+    \item Info-paneel
+    \item Zoekknop
+    \item Statuslabels
+\end{enumerate}
+
+\subsection{Minikaart}
+
+MapKit-view met fullscreen animatie en annotaties.
+
+\subsection{Zoekscherm}
+
+Geïmplementeerd via \texttt{UISheetPresentationController} met live zoekresultaten.
+
+\subsection{Grafinformatie}
+
+Blur-card met grafdetails en sluitfunctie.
+
+\section{Mockdata}
+
+Data wordt opgeslagen in JSON-formaat met velden zoals naam, coördinaten en sectie.
+
+\section{Iteratief ontwikkelproces}
+
+\begin{itemize}
+    \item Iteratie 1: basisstructuur
+    \item Iteratie 2: zoekfunctionaliteit
+    \item Iteratie 3: AR-ankers
+    \item Iteratie 4: 2D-pijl
+    \item Iteratie 5: 3D-pijl
+    \item Iteratie 6: UI-verfijning
+\end{itemize}
+
+\section{Technische beperkingen}
+
+\begin{itemize}
+    \item GPS-nauwkeurigheid (3–10 meter)
+    \item Initialisatietijd
+    \item AR drift
+    \item Licht- en weersinvloeden
+\end{itemize}
+
+\section{Aansluiting op methodologie en literatuur}
+
+De implementatie ondersteunt zowel kaart- als AR-navigatie en sluit aan bij de onderzoeksvraag.
+
+Belangrijke literatuurinzichten:
+
+\begin{itemize}
+    \item Verminderde cognitieve belasting door AR
+    \item Directe visuele navigatie
+    \item Gebruiksvriendelijke interface
+\end{itemize}
