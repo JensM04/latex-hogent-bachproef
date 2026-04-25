@@ -1,0 +1,26 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{c+c1}{// 3. Pulserende grondring}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{ring}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb+bp}{SCNTorus}\PYG{p}{(}\PYG{n}{ringRadius}\PYG{p}{:}\PYG{+w}{ }\PYG{l+m+mf}{0.6}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{pipeRadius}\PYG{p}{:}\PYG{+w}{ }\PYG{l+m+mf}{0.03}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{ring}\PYG{p}{.}\PYG{n}{firstMaterial}\PYG{p}{?.}\PYG{n}{diffuse}\PYG{p}{.}\PYG{n}{contents}\PYG{+w}{ }\PYG{p}{=}
+\PYG{+w}{    }\PYG{n+nb+bp}{UIColor}\PYG{p}{.}\PYG{n}{systemYellow}\PYG{p}{.}\PYG{n}{withAlphaComponent}\PYG{p}{(}\PYG{l+m+mf}{0.5}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{ringNode}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb+bp}{SCNNode}\PYG{p}{(}\PYG{n}{geometry}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{ring}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{ringNode}\PYG{p}{.}\PYG{n}{position}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb+bp}{SCNVector3}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mf}{0.01}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{)}
+
+\PYG{+w}{    }\PYG{c+c1}{// 4. Billboard\PYGZhy{}naambord met naam en levensdatums}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{nameText}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb+bp}{SCNText}\PYG{p}{(}\PYG{n}{string}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{grave}\PYG{p}{.}\PYG{n}{fullName}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{extrusionDepth}\PYG{p}{:}\PYG{+w}{ }\PYG{l+m+mf}{0.005}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{nameText}\PYG{p}{.}\PYG{n}{font}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb+bp}{UIFont}\PYG{p}{.}\PYG{n}{systemFont}\PYG{p}{(}\PYG{n}{ofSize}\PYG{p}{:}\PYG{+w}{ }\PYG{l+m+mf}{0.38}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{weight}\PYG{p}{:}\PYG{+w}{ }\PYG{p}{.}\PYG{n}{bold}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{nameText}\PYG{p}{.}\PYG{n}{firstMaterial}\PYG{p}{?.}\PYG{n}{diffuse}\PYG{p}{.}\PYG{n}{contents}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb+bp}{UIColor}\PYG{p}{.}\PYG{n}{white}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{nameNode}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb+bp}{SCNNode}\PYG{p}{(}\PYG{n}{geometry}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{nameText}\PYG{p}{)}
+
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{bb}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb+bp}{SCNBillboardConstraint}\PYG{p}{()}
+\PYG{+w}{    }\PYG{n}{bb}\PYG{p}{.}\PYG{n}{freeAxes}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{.}\PYG{n}{Y}
+\PYG{+w}{    }\PYG{n}{nameNode}\PYG{p}{.}\PYG{n}{constraints}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{n}{bb}\PYG{p}{]}
+
+\PYG{+w}{    }\PYG{n}{root}\PYG{p}{.}\PYG{n}{addChildNode}\PYG{p}{(}\PYG{n}{cubeNode}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{root}\PYG{p}{.}\PYG{n}{addChildNode}\PYG{p}{(}\PYG{n}{beamNode}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{root}\PYG{p}{.}\PYG{n}{addChildNode}\PYG{p}{(}\PYG{n}{ringNode}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{root}\PYG{p}{.}\PYG{n}{addChildNode}\PYG{p}{(}\PYG{n}{nameNode}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{sceneView}\PYG{p}{.}\PYG{n}{scene}\PYG{p}{.}\PYG{n}{rootNode}\PYG{p}{.}\PYG{n}{addChildNode}\PYG{p}{(}\PYG{n}{root}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{graveMarkerNode}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{root}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

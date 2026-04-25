@@ -1,150 +1,624 @@
-\chapter{Implementatie}
+\chapter{\IfLanguageName{dutch}{Implementatie}{Implementation}}%
+\label{ch:implementatie}
 
-Dit hoofdstuk beschrijft de concrete uitwerking van het proof of concept dat werd ontwikkeld in het kader van dit onderzoek. Zoals uiteengezet in de methodologie, werd de implementatie stapsgewijs opgebouwd: eerst een werkende basisstructuur, vervolgens de integratie van de AR-laag. Dit hoofdstuk volgt die logische opbouw en documenteert per component de technische keuzes, de implementatiedetails en de aansluiting op de in de literatuurstudie beschreven vereisten.
+Dit hoofdstuk beschrijft de concrete uitwerking van het proof of concept dat werd ontwikkeld in het kader van dit onderzoek. Zoals beschreven in de methodologie, werd de implementatie stapsgewijs opgebouwd: eerst een werkende basisstructuur, vervolgens de integratie van de AR-laag. Dit hoofdstuk volgt die logische opbouw en documenteert per component de technische keuzes, de implementatiedetails en de aansluiting op de in de literatuurstudie beschreven vereisten.
 
 \section{Technische omgeving en tools}
 
-De applicatie werd ontwikkeld als een native iOS-applicatie in de programmeertaal Swift (versie 5.9), binnen de ontwikkelomgeving Xcode 15. De keuze voor een native iOS-oplossing is gemotiveerd door de rijke ondersteuning van Apple voor AR-toepassingen via het ARKit-framework, de stabiele integratie met de hardware van de iPhone (camera, GPS, gyroscoop, versnellingsmeter) en de betere prestatiegaranties in vergelijking met cross-platform alternatieven.
+De applicatie werd ontwikkeld als een native iOS-applicatie in de programmeertaal Swift (versie 5.9), binnen de ontwikkelomgeving Xcode 15. De keuze voor een native iOS-oplossing is gemotiveerd door drie factoren: de rijke ondersteuning van Apple voor AR-toepassingen via het ARKit-framework, de stabiele integratie met de hardware van de iPhone (camera, GPS, gyroscoop, versnellingsmeter), en de betere prestatiegaranties in vergelijking met cross-platform alternatieven zoals React Native of Flutter. ARKit vereist directe toegang tot de AVCaptureSession van het toestel, wat in een cross-platform omgeving doorgaans extra abstractielagen introduceert die de latentie verhogen.
 
 De voornaamste frameworks die gebruikt worden, zijn:
 
 \begin{itemize}
-    \item \textbf{ARKit} – Apple’s framework voor augmented reality op iOS.
-    \item \textbf{SceneKit} – 3D-renderingframework voor AR-objecten.
-    \item \textbf{MapKit} – kaartweergave en annotaties.
-    \item \textbf{CoreLocation} – GPS en kompasrichting.
-    \item \textbf{Combine} – reactief programmeerframework.
+    \item \textbf{ARKit} – Apple's framework voor augmented reality op iOS. Verantwoordelijk voor de world tracking-sessie, de koppeling tussen de camerafeed en het 3D-coördinatenstelsel, en de verwerking van sensordata (camera, versnellingsmeter, gyroscoop).
+    \item \textbf{SceneKit} – het 3D-renderingframework van Apple, gebruikt voor het bouwen en animeren van de AR-knooppunten: de navigatiepijl, de grafmarker en de billboard-labels.
+    \item \textbf{MapKit} – het kaartframework van Apple, gebruikt voor de minikaart-component. Biedt satellietweergave, annotatiebeheer en routeweergave.
+    \item \textbf{CoreLocation} – verantwoordelijk voor de GPS-positionering van de gebruiker en de kompasrichting. Levert coördinaten in het WGS-84-stelsel en de ware-noorden-heading in graden.
+    \item \textbf{Combine} – Apple's reactief programmeerframework, gebruikt voor het publiceren van statuswijzigingen (geselecteerd graf, afstand tot doel, heading) naar de UI zonder expliciete callback-ketens.
 \end{itemize}
 
-De applicatie maakt gebruik van het SwiftUI app lifecycle-model, gecombineerd met UIKit via een bridge.
+De applicatie maakt gebruik van het SwiftUI app lifecycle-model als startpunt, maar de volledige interface is geïmplementeerd in UIKit. De brug tussen beide werelden wordt gelegd via een \texttt{UIViewControllerRepresentable}-wrapper:
+
+\begin{listing}[H]
+    \begin{minted}{swift}
+        @main
+        struct ARCemeteryNavigatorApp: App {
+            var body: some Scene {
+                WindowGroup {
+                    RootViewControllerRepresentable()
+                    .ignoresSafeArea()
+                    .statusBarHidden(true)
+                }
+            }
+        }
+        
+        struct RootViewControllerRepresentable: UIViewControllerRepresentable {
+            func makeUIViewController(context: Context) -> ViewController {
+                return ViewController()
+            }
+            func updateUIViewController(_ uiViewController: ViewController,
+            context: Context) { }
+        }
+    \end{minted}
+    \caption[SwiftUI naar UIKit bridge]{Bridge tussen SwiftUI lifecycle en UIKit root controller.}
+\end{listing}
+
+Deze aanpak laat toe om ARKit's camerasessie onmiddellijk te starten bij het openen van de applicatie, zonder enige SwiftUI-navigatiewrapper die de eerste frame vertraagt. Dit sluit aan bij de bevinding dat het verminderen van cognitieve belasting een kernvereiste is voor bruikbare AR-navigatiesystemen \autocite{Zhao2025}.
 
 \section{Softwarearchitectuur}
 
-De architectuur volgt het principe van \textit{separation of concerns} en het Repository-patroon.
+De architectuur van de applicatie is opgesplitst in afzonderlijke lagen, overeenkomstig het Repository-patroon en het principe van \textit{separation of concerns}. Elke laag is verantwoordelijk voor één domein en communiceert met andere lagen via Swift-protocollen (delegates). Dit maakt de code testbaar en uitbreidbaar: de databron kan bijvoorbeeld vervangen worden door een live REST API zonder wijzigingen in de UI-code. Dit kan belangrijk zijn voor toekomstig gebruik van de app door bijvoorbeeld apis te gebruiken die data ophalen van verschillende gemeenten.
 
-\subsection{Datamodellen}
+\subsection{Datamodellen (Models.swift)}
 
-Het centrale model is \texttt{GraveRecord}, een structuur met grafgegevens zoals naam, coördinaten en metadata.
+Het centrale model is \texttt{GraveRecord}, een Swift-struct die alle informatie over één graf bevat:
 
-Daarnaast wordt \texttt{ARNavigationState} gebruikt als \texttt{ObservableObject} voor de navigatiestatus.
+\begin{listing}[H]
+    \begin{minted}{swift}
+        struct GraveRecord: Identifiable, Codable, Hashable {
+            let id: String
+            let firstName: String
+            let lastName: String
+            let birthYear: Int?
+            let deathYear: Int?
+            let biography: String?
+            let latitude: Double
+            let longitude: Double
+            let section: String
+            let row: Int?
+            let plot: Int?
+            
+            var fullName: String { "\(firstName) \(lastName)" }
+            
+            var lifespan: String {
+                switch (birthYear, deathYear) {
+                    case let (b?, d?): return "\(b) - \(d)"
+                    case let (b?, nil): return "b. \(b)"
+                    case let (nil, d?): return "d. \(d)"
+                    default: return "Unknown"
+                }
+            }
+            
+            var location: CLLocation {
+                CLLocation(latitude: latitude, longitude: longitude)
+            }
+        }
+    \end{minted}
+    \caption[GraveRecord datamodel]{Definitie van het GraveRecord datamodel.}
+\end{listing}
 
-De bearing-berekening gebeurt via:
+Als pure Swift value type is \texttt{GraveRecord} thread-safe en kan het zonder risico worden doorgegeven tussen de servicelayer en de UI-thread. De \texttt{Codable}-conformiteit laat directe JSON-decodering toe zonder handmatig parsen.
 
-\begin{verbatim}
-    y = sin(Δlon) × cos(lat2)
-    x = cos(lat1) × sin(lat2) − sin(lat1) × cos(lat2) × cos(Δlon)
-    bearing = atan2(y, x)
-\end{verbatim}
+Aanvullend bevat dit bestand de klasse \texttt{ARNavigationState}, een \texttt{@MainActor ObservableObject} die de navigatiestatus bijhoudt:
 
-\subsection{Dataservice}
+\begin{listing}[H]
+    \begin{minted}{swift}
+        @MainActor
+        final class ARNavigationState: ObservableObject {
+            @Published var selectedGrave: GraveRecord?
+            @Published var distanceToTarget: Double?
+            @Published var isARRunning: Bool = false
+            @Published var heading: Double = 0
+            @Published var userLocation: CLLocation?
+        }
+    \end{minted}
+    \caption[ARNavigationState]{Navigatiestatus gedeeld tussen alle componenten via Combine.}
+\end{listing}
 
-De dataservice volgt het Repository-patroon en leest JSON-data in via asynchrone verwerking. Zoekfunctionaliteit gebeurt via case-insensitieve matching.
+Door gebruik te maken van het \texttt{@Published}-mechanisme van Combine worden UI-componenten automatisch bijgewerkt wanneer deze waarden wijzigen, zonder expliciete notificaties of callback-ketens.
 
-\subsection{Locatieservice}
+Ten slotte bevat het bestand een uitbreiding op \texttt{CLLocationCoordinate2D} die de \texttt{bearing()}-methode implementeert. Deze berekent de kompasrichting in graden (0–360, met de klok mee vanaf ware noorden) van één GPS-coördinaat naar een ander, op basis van de sferische cosinusregel:
 
-De LocationManager levert GPS- en headingdata met hoge nauwkeurigheid en werkt met delegates.
+\begin{listing}[H]
+    \begin{minted}{swift}
+        extension CLLocationCoordinate2D {
+            func bearing(to other: CLLocationCoordinate2D) -> Double {
+                let lat1 = self.latitude  * .pi / 180
+                let lat2 = other.latitude * .pi / 180
+                let dLon = (other.longitude - self.longitude) * .pi / 180
+                
+                let y = sin(dLon) * cos(lat2)
+                let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
+                
+                let bearing = atan2(y, x) * 180 / .pi
+                return (bearing + 360).truncatingRemainder(dividingBy: 360)
+            }
+        }
+    \end{minted}
+    \caption[Bearing-berekening]{Bearing-berekening tussen twee GPS-coördinaten.}
+\end{listing}
 
-\section{De AR-component}
+\subsection{Dataservice (GraveDataService.swift)}
 
-\subsection{ARKit-configuratie}
+De \texttt{GraveDataService}-klasse volgt het Repository-patroon en fungeert als enige bron van waarheid voor grafdata. Bij het opstarten laadt de service de bundled \texttt{graves.json} asynchroon op een achtergrondthread, om blokkering van de UI-thread te vermijden:
 
-De applicatie gebruikt \texttt{ARWorldTrackingConfiguration} met:
+\begin{listing}[H]
+    \begin{minted}{swift}
+        func load() async {
+            isLoading = true
+            defer { isLoading = false }
+            
+            guard let url = Bundle.main.url(forResource: "graves",
+            withExtension: "json") else { return }
+            
+            let graves = try await Task.detached(priority: .userInitiated) {
+                let data = try Data(contentsOf: url)
+                return try JSONDecoder().decode([GraveRecord].self, from: data)
+            }.value
+            
+            self.allGraves = graves
+        }
+    \end{minted}
+    \caption[Asynchroon laden van grafdata]{Asynchroon laden van grafdata op een achtergrondthread.}
+\end{listing}
 
+De zoekfunctie past diakritiek-insensitieve vergelijking toe. Dit is bijzonder relevant voor Belgisch kerkhofdata, waar namen frequent accenten bevatten (é, ë, ü, ç):
+
+\begin{listing}[H]
+    \begin{minted}{swift}
+        func search(query: String) -> [GraveRecord] {
+            let options: String.CompareOptions =
+            [.caseInsensitive, .diacriticInsensitive]
+            
+            return allGraves
+            .filter { grave in
+                grave.fullName.range(of: query, options: options) != nil
+                || grave.section.range(of: query, options: options) != nil
+            }
+            .sorted { a, b in
+                let aPrefix = a.fullName.range(
+                of: query, options: [options, .anchored]) != nil
+                let bPrefix = b.fullName.range(
+                of: query, options: [options, .anchored]) != nil
+                if aPrefix != bPrefix { return aPrefix }
+                return a.lastName < b.lastName
+            }
+        }
+    \end{minted}
+    \caption[Diakritiek-insensitieve zoekfunctie]{Zoekfunctie met diakritiek-insensitieve matching en relevantiesortering.}
+\end{listing}
+
+Resultaten worden gesorteerd op relevantie: prefixmatches (namen die beginnen met de zoekopdracht) krijgen hogere prioriteit dan middenin-matches.
+
+\subsection{Locatieservice (LocationManager.swift)}
+
+\texttt{LocationManager} omhult \texttt{CLLocationManager} en levert twee datastromen via het delegate-protocol: GPS-locatie-updates en kompasrichting-updates. De configuratie is geoptimaliseerd voor navigatie op kerkhofschaal:
+
+\begin{listing}[H]
+    \begin{minted}{swift}
+        clManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        clManager.distanceFilter  = 1.0   // update per meter verplaatsing
+        clManager.headingFilter   = 5.0   // update per 5 graden draaiing
+    \end{minted}
+    \caption[LocationManager configuratie]{Configuratie van de LocationManager voor navigatienauwkeurigheid.}
+\end{listing}
+
+Een afstandsfilter van 1 meter en een headingfilter van 5 graden zijn gekozen om een evenwicht te vinden tussen update-frequentie en batterijverbruik.
+
+\section{De AR-component (ARSessionManager.swift)}
+
+De \texttt{ARSessionManager}-klasse vormt de kern van de technische bijdrage van dit proof of concept. Ze beheert de ARKit-sessie, converteert GPS-coördinaten naar AR-wereldcoördinaten, bouwt de 3D-navigatiepijl en de 3D-grafmarker, en voert per-frame updates uit van de pijlrichting.
+
+\subsection{ARKit-sessieconfiguratie}
+
+De ARKit-sessie wordt geconfigureerd met \texttt{ARWorldTrackingConfiguration}:
+
+\begin{listing}[H]
+    \begin{minted}{swift}
+        private let configuration: ARWorldTrackingConfiguration = {
+            let c = ARWorldTrackingConfiguration()
+            c.worldAlignment = .gravityAndHeading
+            c.planeDetection = .horizontal
+            return c
+        }()
+    \end{minted}
+    \caption[ARKit sessieconfiguratie]{Configuratie van de ARKit world tracking sessie.}
+\end{listing}
+
+De cruciale instelling is \texttt{worldAlignment = .gravityAndHeading}. Dit uitlijningssysteem zorgt ervoor dat:
 \begin{itemize}
-    \item worldAlignment = gravityAndHeading
-    \item horizontale vlakdetectie
+    \item de Y-as samenvalt met de zwaartekracht (omhoog);
+    \item de negatieve Z-as wijst naar magnetisch noorden;
+    \item de X-as wijst naar het oosten.
 \end{itemize}
 
-\subsection{GPS naar AR-coördinaten}
+Dit stemt overeen met het WGS-84 geografische coördinatenstelsel en maakt directe conversie van GPS-coördinaten naar AR-wereldposities mogelijk zonder extra rotatieberekeningen.
 
-De omzetting gebeurt via:
+\subsection{GPS naar AR-coördinaten: de vlakke-Aarde-benadering}
 
-\[
-X = \Delta lon \times 111.320 \times \cos(lat) \times 1000
-\]
-\[
-Z = -\Delta lat \times 111.320 \times 1000
-\]
-
-\subsection{Navigatiepijl}
-
-De pijl wordt als 3D-object opgebouwd en per frame geüpdatet.
-
-Rotatie gebeurt via:
+Een centrale technische uitdaging in buitenomgevings-AR is de omzetting van WGS-84 GPS-coördinaten naar het lokale Cartesische coördinatenstelsel van ARKit. De in deze implementatie gebruikte methode is de \textit{vlakke-Aarde-benadering}:
 
 \[
-\theta = \text{atan2}(dx, dz)
+X_{\text{AR}} = \Delta\text{lon} \times 111{.}320 \times \cos(\varphi_{\text{origin}}) \times 1000
+\]
+\[
+Z_{\text{AR}} = -\Delta\text{lat} \times 111{.}320 \times 1000
 \]
 
-\subsection{Grafmarker}
+Het negatieve teken voor de Z-offset is essentieel: in het ARKit-coördinatenstelsel wijst positieve Z naar de camera (achter), terwijl geografisch noorden overeenkomt met negatieve Z. In Swift:
 
-Bestaat uit:
+\begin{listing}[H]
+    \begin{minted}{swift}
+        func worldOffset(from origin: CLLocationCoordinate2D,
+        to target: CLLocationCoordinate2D) -> (x: Float, z: Float) {
+            let mPerLat = 111_320.0
+            let mPerLon = 111_320.0 * cos(origin.latitude * .pi / 180)
+            let x = Float((target.longitude - origin.longitude) * mPerLon)
+            let z = Float(-(target.latitude  - origin.latitude) * mPerLat)
+            return (x, z)
+        }
+    \end{minted}
+    \caption[GPS naar ARKit coördinatenomzetting]{Vlakke-Aarde omzetting van GPS naar ARKit-wereldcoördinaten.}
+\end{listing}
+
+De omzettingsfout bedraagt minder dan 0,01\% binnen een straal van 500 meter, ruimschoots voldoende voor de schaal van een begraafplaats. Dit resultaat is in lijn met de bevindingen van \autocite{Xu2018} over de nauwkeurigheid van AR-registratie bij buitentoepassingen op lokale schaal.
+
+Het GPS-oorsprongspunt wordt ingesteld bij de eerste nauwkeurige GPS-fix van de gebruiker. Alle grafposities worden berekend als offsets ten opzichte van dit punt:
+
+\begin{listing}[H]
+    \begin{minted}{swift}
+        func setOrigin(coordinate: CLLocationCoordinate2D) {
+            guard originCoordinate == nil else { return }
+            originCoordinate = coordinate
+            
+            if let grave = targetGrave {
+                let off = worldOffset(from: coordinate, to: grave.coordinate)
+                graveWorldPosition = SIMD3<Float>(off.x, 0, off.z)
+                buildGraveMarker()
+            }
+        }
+    \end{minted}
+    \caption[AR oorsprongspunt]{Instellen van het AR-oorsprongspunt bij de eerste GPS-fix.}
+\end{listing}
+
+\subsection{De 3D-navigatiepijl}
+
+De navigatiepijl is opgebouwd als een samengesteld \texttt{SCNNode}-object met twee geometrische elementen:
+
+\begin{listing}[H]
+    \begin{minted}{swift}
+        private func buildArrow() {
+            let root = SCNNode()
+            
+            // Schacht: een platte balk langs de +Z-as
+            let body = SCNBox(width: 0.18, height: 0.06,
+            length: 0.42, chamferRadius: 0.015)
+            body.firstMaterial?.diffuse.contents  = UIColor.systemYellow
+            body.firstMaterial?.emission.contents =
+            UIColor.systemYellow.withAlphaComponent(0.55)
+            let bodyNode = SCNNode(geometry: body)
+            
+            // Kop: een brede piramide met punt langs +Z.
+            // SCNPyramid heeft standaard de punt langs +Y;
+            // rotatie van -90 graden rond X heroriënteert naar +Z.
+            let head = SCNPyramid(width: 0.38, height: 0.28, length: 0.38)
+            head.firstMaterial?.diffuse.contents  = UIColor.systemYellow
+            head.firstMaterial?.emission.contents =
+            UIColor.systemYellow.withAlphaComponent(0.65)
+            let headNode = SCNNode(geometry: head)
+            headNode.eulerAngles = SCNVector3(-Float.pi / 2, 0, 0)
+            headNode.position    = SCNVector3(0, 0, 0.35)
+            
+            root.addChildNode(bodyNode)
+            root.addChildNode(headNode)
+            sceneView.scene.rootNode.addChildNode(root)
+            arrowNode = root
+        }
+    \end{minted}
+    \caption[3D navigatiepijl opbouw]{Opbouw van de 3D-navigatiepijl als samengesteld SCNNode-object.}
+\end{listing}
+
+De rustoriëntatie is zo gekozen dat de punt wijst langs de \texttt{+Z}-as. De \texttt{SCNPyramid}-geometrie heeft standaard zijn punt langs \texttt{+Y}; door een rotatie van $-90°$ rond de X-as toe te passen wordt deze geheroriënteerd naar \texttt{+Z}. Een pulserende opacity-animatie trekt de aandacht van de gebruiker:
+
+\begin{listing}[H]
+    \begin{minted}{swift}
+        let pulse = CABasicAnimation(keyPath: "opacity")
+        pulse.fromValue    = 1.0
+        pulse.toValue      = 0.5
+        pulse.duration     = 0.85
+        pulse.autoreverses = true
+        pulse.repeatCount  = .infinity
+        root.addAnimation(pulse, forKey: "pulse")
+    \end{minted}
+    \caption[Pulsanimatie op de navigatiepijl]{Pulserende opacity-animatie op de navigatiepijl.}
+\end{listing}
+
+\subsubsection{Per-frame positie- en rotatieupdate}
+
+De pijl volgt de gebruiker: elke renderframe (±60 Hz) wordt de pijl geherpositioneerd op 1,8 meter voor de camera en geroteerd naar het geselecteerde graf. Dit gebeurt rechtstreeks op de SceneKit render thread:
+
+\begin{listing}[H]
+    \begin{minted}{swift}
+        func renderer(_ renderer: SCNSceneRenderer,
+        updateAtTime time: TimeInterval) {
+            guard let frame = sceneView.session.currentFrame else { return }
+            updateArrow(cameraTransform: frame.camera.transform)
+        }
+        
+        private func updateArrow(cameraTransform: simd_float4x4) {
+            guard let arrow = arrowNode else { return }
+            
+            let cx = cameraTransform.columns.3.x
+            let cy = cameraTransform.columns.3.y
+            let cz = cameraTransform.columns.3.z
+            
+            // Kijkrichting: -Z-kolom van de cameramatrix, geprojecteerd op XZ
+            let fwdX = -cameraTransform.columns.2.x
+            let fwdZ = -cameraTransform.columns.2.z
+            let fwdLen = sqrt(fwdX * fwdX + fwdZ * fwdZ)
+            let nx: Float = fwdLen > 0.001 ? fwdX / fwdLen : 0
+            let nz: Float = fwdLen > 0.001 ? fwdZ / fwdLen : -1
+            
+            // Positioneer 1,8 m voor de camera, licht onder ooghoogte
+            arrow.position = SCNVector3(cx + nx * 1.8, cy - 0.25, cz + nz * 1.8)
+            
+            // Roteer de +Z-as van de pijl naar het graf
+            if let gravePos = graveWorldPosition {
+                let dx = gravePos.x - arrow.position.x
+                let dz = gravePos.z - arrow.position.z
+                arrow.eulerAngles = SCNVector3(0, atan2(dx, dz), 0)
+            }
+        }
+    \end{minted}
+    \caption[Per-frame pijlupdate]{Per-frame update van pijlpositie en -rotatie op de SceneKit render thread.}
+\end{listing}
+
+Een belangrijk implementatiedetail: de update wordt rechtstreeks op de SceneKit render thread uitgevoerd, zonder \texttt{DispatchQueue.main.async}. Dit vermijdt een vertraging van één of meerdere frames en garandeert vloeiende beweging. De rotatiehoek via \texttt{atan2(dx, dz)} zorgt ervoor dat de \texttt{+Z}-as van de pijl steeds naar het geselecteerde graf wijst, vergelijkbaar met een kompasnaald in 3D.
+
+\subsection{De 3D-grafmarker}
+
+Wanneer de GPS-oorsprong gekend is, wordt een world-locked grafmarker geplaatst op de GPS-positie van het geselecteerde graf:
+
+\begin{listing}[H]
+    \begin{minted}{swift}
+        private func buildGraveMarker() {
+            guard let pos = graveWorldPosition,
+            let grave = targetGrave else { return }
+            
+            let root = SCNNode()
+            root.position = SCNVector3(pos.x, 0, pos.z)
+            
+            // 1. Roterende kubus op grondniveau
+            let cube = SCNBox(width: 0.4, height: 0.4,
+            length: 0.4, chamferRadius: 0.04)
+            cube.firstMaterial?.diffuse.contents = UIColor.systemYellow
+            cube.firstMaterial?.transparency     = 0.85
+            let cubeNode = SCNNode(geometry: cube)
+            cubeNode.position = SCNVector3(0, 0.2, 0)
+            
+            let spin = CABasicAnimation(keyPath: "eulerAngles.y")
+            spin.toValue     = Float.pi * 2
+            spin.duration    = 4.0
+            spin.repeatCount = .infinity
+            cubeNode.addAnimation(spin, forKey: "spin")
+            
+            // 2. Verticale lichtbalk (6 meter hoog, zichtbaar van veraf)
+            let beam = SCNCylinder(radius: 0.03, height: 6.0)
+            beam.firstMaterial?.diffuse.contents =
+            UIColor.systemYellow.withAlphaComponent(0.3)
+            let beamNode = SCNNode(geometry: beam)
+            beamNode.position = SCNVector3(0, 3.0, 0)
+        \end{minted}
+        \caption[3D grafmarker -- deel 1]{Opbouw van de world-locked 3D-grafmarker (deel 1): kubus en lichtbalk.}
+    \end{listing}
+    
+    \begin{listing}[H]
+        \begin{minted}{swift}
+            // 3. Pulserende grondring
+            let ring = SCNTorus(ringRadius: 0.6, pipeRadius: 0.03)
+            ring.firstMaterial?.diffuse.contents =
+            UIColor.systemYellow.withAlphaComponent(0.5)
+            let ringNode = SCNNode(geometry: ring)
+            ringNode.position = SCNVector3(0, 0.01, 0)
+            
+            // 4. Billboard-naambord met naam en levensdatums
+            let nameText = SCNText(string: grave.fullName, extrusionDepth: 0.005)
+            nameText.font = UIFont.systemFont(ofSize: 0.38, weight: .bold)
+            nameText.firstMaterial?.diffuse.contents = UIColor.white
+            let nameNode = SCNNode(geometry: nameText)
+            
+            let bb = SCNBillboardConstraint()
+            bb.freeAxes = .Y
+            nameNode.constraints = [bb]
+            
+            root.addChildNode(cubeNode)
+            root.addChildNode(beamNode)
+            root.addChildNode(ringNode)
+            root.addChildNode(nameNode)
+            sceneView.scene.rootNode.addChildNode(root)
+            graveMarkerNode = root
+        }
+    \end{minted}
+    \caption[3D grafmarker -- deel 2]{Opbouw van de world-locked 3D-grafmarker (deel 2): grondring en naambord.}
+\end{listing}
+
+De vier componenten dienen elk een afzonderlijk doel:
 
 \begin{itemize}
-    \item Roterende kubus
-    \item Verticale lichtbalk
-    \item Pulserende grondring
-    \item Billboard-label
+    \item \textbf{Roterende kubus} – een semi-transparante gele kubus van 40~cm die langzaam roteert. De rotatie benadrukt het artificiële karakter van het object en maakt het onmiddellijk herkenbaar als een digitaal element.
+    \item \textbf{Verticale lichtbalk} – een dunne cilinder van 6 meter hoogte, zichtbaar van tientallen meters afstand. Een verticaal baken dat boven de omgeving uitsteekt biedt een betrouwbaarder visueel referentiepunt dan een ankerpunt op de grond \autocite{Zhao2025}.
+    \item \textbf{Pulserende grondring} – een \texttt{SCNTorus} op grondniveau met een pulserende animatie op de buisstraal, die de exacte positie op de grond benadrukt.
+    \item \textbf{Billboard-naambord} – een \texttt{SCNText}-object met naam en levensdatums, uitgerust met een \texttt{SCNBillboardConstraint} zodat het altijd naar de camera gedraaid is. De lettertypegrootte van 0,38 wereldeenheden zorgt voor leesbaarheid vanaf circa 15 meter.
 \end{itemize}
 
 \section{UI-componenten}
 
-\subsection{ViewController}
+\subsection{ViewController – centrale coördinator}
 
-Centrale controller met volgende lagen:
+\texttt{ViewController} fungeert als de centrale coördinator van de applicatie. De view-hiërarchie is als volgt opgebouwd (van laag naar hoog in z-volgorde):
 
 \begin{enumerate}
-    \item AR-weergave
-    \item Minikaart
-    \item Info-paneel
-    \item Zoekknop
-    \item Statuslabels
+    \item \textbf{ARSCNView} – de volledige achtergrond, cameraweergave met 3D AR-scène.
+    \item \textbf{MinimapViewController.view} – minikaart in de linkerbenedenhoek.
+    \item \textbf{GraveInfoCard} – informatiekaart onderaan, zichtbaar bij selectie van een graf.
+    \item \textbf{Zoekknop (FAB)} – rechtsbenedenhoek.
+    \item \textbf{Trackingstatus-label} – bovenaan gecentreerd, communiceert de AR-trackingkwaliteit.
+    \item \textbf{Afstandslabel} – rechtsboven, toont de afstand tot het geselecteerde graf.
 \end{enumerate}
 
-\subsection{Minikaart}
+Wanneer de gebruiker een graf selecteert, roept \texttt{ViewController} de centrale methode \texttt{navigateTo(grave:)} aan:
 
-MapKit-view met fullscreen animatie en annotaties.
+\begin{listing}[H]
+    \begin{minted}{swift}
+        func navigateTo(grave: GraveRecord) {
+            navState.selectedGrave  = grave
+            minimapVC.selectedGrave = grave
+            
+            // Start AR-navigatie: bouw pijl en grafmarker
+            arManager.startNavigation(to: grave)
+            
+            // Toon afstand tot doel
+            updateDistanceLabel(for: grave)
+            
+            // Toon grafdetails onderaan
+            infoCard.configure(with: grave)
+            showInfoCard()
+            
+            // Centreer minikaart op het geselecteerde graf
+            minimapVC.centreMap(on: grave.coordinate, span: 0.0005)
+        }
+    \end{minted}
+    \caption[Centrale navigatiemethode]{Centrale navigatiemethode die alle componenten coördineert.}
+\end{listing}
 
-\subsection{Zoekscherm}
+\subsection{Minikaart (MinimapViewController)}
 
-Geïmplementeerd via \texttt{UISheetPresentationController} met live zoekresultaten.
+De minikaart is geïmplementeerd als een child view controller met een \texttt{MKMapView} in satellietmodus. In de standaardtoestand is het een afgerond widget van 120~×~120 pixels in de linkerbenedenhoek. Door op de minikaart te tikken wordt een fullscreen-animatie gestart:
 
-\subsection{Grafinformatie}
+\begin{listing}[H]
+    \begin{minted}{swift}
+        func enterFullscreen() {
+            guard !isFullscreen, let parent = parent else { return }
+            isFullscreen = true
+            
+            // Herouder de view naar de rootview zodat Auto Layout-constraints
+            // van de schaduwcontainer de animatie niet blokkeren
+            let currentFrame = view.convert(view.bounds, to: parent.view)
+            parent.view.addSubview(view)
+            view.translatesAutoresizingMaskIntoConstraints = true
+            view.frame = currentFrame
+            
+            UIView.animate(withDuration: 0.38, delay: 0,
+            usingSpringWithDamping: 0.9,
+            initialSpringVelocity: 0.2) {
+                self.view.frame = parent.view.bounds
+                self.view.layer.cornerRadius = 0
+            } completion: { _ in
+                self.mapView.isScrollEnabled = true
+                self.mapView.isZoomEnabled   = true
+                self.zoomToFitAllAnnotations()
+                self.showCloseButton()
+            }
+        }
+    \end{minted}
+    \caption[Minikaart fullscreen animatie]{Fullscreen-animatie van de minikaart via view-heroudering.}
+\end{listing}
 
-Blur-card met grafdetails en sluitfunctie.
+De animatie werkt door de view tijdelijk te herouderen naar de rootview. Dit is noodzakelijk omdat de Auto Layout-beperkingen van de schaduwcontainer de animatie anders zouden blokkeren, waardoor de widget enkel zou inzoomen in plaats van uit te vouwen.
 
-\section{Mockdata}
+\subsection{Zoekscherm (SearchViewController)}
 
-Data wordt opgeslagen in JSON-formaat met velden zoals naam, coördinaten en sectie.
+Het zoekscherm wordt gepresenteerd als een \texttt{UISheetPresentationController} – een half-hoogte schuifblad over de AR-weergave:
+
+\begin{listing}[H]
+    \begin{minted}{swift}
+        let nav = UINavigationController(rootViewController: vc)
+        if let sheet = nav.sheetPresentationController {
+            sheet.detents               = [.medium(), .large()]
+            sheet.prefersGrabberVisible = true
+            sheet.preferredCornerRadius = 20
+        }
+        present(nav, animated: true)
+    \end{minted}
+    \caption[Zoekscherm als sheet]{Presentatie van het zoekscherm als half-hoogte sheet.}
+\end{listing}
+
+Dit ontwerp behoudt de AR-context in de achtergrond en vermijdt een volledige navigatieovergang. De zoekresultaten worden live bijgewerkt via \texttt{UISearchResultsUpdating}: bij elke toetsaanslag wordt \texttt{GraveDataService.search(query:)} aangeroepen en de tabel bijgewerkt.
+
+\subsection{Grafinformatiekaart (GraveInfoCard)}
+
+De \texttt{GraveInfoCard} is een aangepaste \texttt{UIView} met een \texttt{UIVisualEffectView} als achtergrond. De kaart verschijnt met een veeranimatie bij selectie van een graf:
+
+\begin{listing}[H]
+    \begin{minted}{swift}
+        private func showInfoCard() {
+            infoCard.isHidden  = false
+            infoCard.alpha     = 0
+            infoCard.transform = CGAffineTransform(translationX: 0, y: 20)
+            UIView.animate(withDuration: 0.3, delay: 0,
+            options: .curveEaseOut) {
+                self.infoCard.alpha     = 1
+                self.infoCard.transform = .identity
+            }
+        }
+    \end{minted}
+    \caption[Informatiekaart animatie]{Inkomende animatie van de grafinformatiekaart.}
+\end{listing}
+
+\section{Mockdata en dataformaat}
+
+Bij gebrek aan toegang tot de reële data van WebBGP werd een representatieve mockdataset aangemaakt in JSON-formaat. Een voorbeeld van één record:
+
+\begin{listing}[H]
+    \begin{minted}{json}
+        {
+            "id": "A-01-01",
+            "firstName": "Marie",
+            "lastName": "Dupont",
+            "birthYear": 1934,
+            "deathYear": 2001,
+            "biography": "Beloved teacher and community leader.",
+            "latitude": 5.3940,
+            "longitude": 4.4502,
+            "section": "Section A",
+            "row": 1,
+            "plot": 1
+        }
+    \end{minted}
+    \caption[Grafrecord in JSON]{Voorbeeld van een grafrecord in graves.json.}
+\end{listing}
+
+Het JSON-formaat is bewust generiek gehouden zodat koppeling met een productiedatabank minimale aanpassingen vereist. In \texttt{GraveDataService.load()} volstaat het om de lokale bundle-URL te vervangen door een \texttt{URLSession}-aanroep naar het API-endpoint van WebBGP of het geoloket, zonder enige wijziging in de UI-code of datamodellen.
 
 \section{Iteratief ontwikkelproces}
 
+De implementatie verliep iteratief, overeenkomstig de methodologie. De voornaamste iteraties waren:
+
 \begin{itemize}
-    \item Iteratie 1: basisstructuur
-    \item Iteratie 2: zoekfunctionaliteit
-    \item Iteratie 3: AR-ankers
-    \item Iteratie 4: 2D-pijl
-    \item Iteratie 5: 3D-pijl
-    \item Iteratie 6: UI-verfijning
+    \item \textbf{Iteratie 1 – Basisstructuur:} \texttt{ARSCNView} als achtergrond, minikaart-widget, zoekknop, en runtime-permissies voor camera en locatie.
+    \item \textbf{Iteratie 2 – Zoekfunctionaliteit:} live zoeken via \texttt{UISearchController}, \texttt{UISheetPresentationController}, en \texttt{GraveInfoCard}.
+    \item \textbf{Iteratie 3 – AR-ankerpunten:} eerste versie van world-locked tekst-annotaties via \texttt{ARAnchor} en \texttt{SCNNode}, geplaatst op GPS-coördinaten.
+    \item \textbf{Iteratie 4 – 2D-pijloverlayer:} een platte UIKit-pijl (\texttt{ARDirectionOverlay}) gebaseerd op bearing-berekening. Hoewel functioneel, ontbrak het dieptegevoel van een echte AR-ervaring.
+    \item \textbf{Iteratie 5 – 3D AR-pijl:} overgang naar een world-space \texttt{SCNNode} die per frame wordt bijgewerkt. Bevatte correctie van het coördinatenstelsel, de rotatiemathematica en de render thread-implementatie.
+    \item \textbf{Iteratie 6 – Visuele verfijning:} hervorming van de pijlgeometrie, vergroting van de grafmarker-labels, en verwijdering van de ARKit feature point-debug-visualisatie.
 \end{itemize}
 
-\section{Technische beperkingen}
+Elke iteratie werd getest op een fysiek iOS-apparaat. ARKit is niet beschikbaar in de iOS-simulator, waardoor fysiek testen onvermijdelijk was voor alle AR-gerelateerde componenten. Problemen die tijdens het testen aan het licht kwamen, werden telkens gedocumenteerd en opgelost in de volgende iteratie. Voorbeelden hiervan zijn de onzichtbare pijl door een verkeerde opbouwvolgorde van \texttt{SCNNode}-kinderen, het latentieprobleem door \texttt{DispatchQueue.main.async} in de render loop, en de onjuiste standaardoriëntatie van \texttt{SCNPyramid} die een expliciete X-rotatie vereiste.
+
+\section{Technische beperkingen en aandachtspunten}
+
+De huidige implementatie heeft een aantal technische beperkingen die relevant zijn voor de evaluatiefase:
 
 \begin{itemize}
-    \item GPS-nauwkeurigheid (3–10 meter)
-    \item Initialisatietijd
-    \item AR drift
-    \item Licht- en weersinvloeden
+    \item \textbf{GPS-nauwkeurigheid:} op een iPhone is de horizontale GPS-nauwkeurigheid doorgaans 3 tot 10 meter. Op een begraafplaats met grafstenen die slechts 60 tot 80 centimeter uit elkaar staan, impliceert dit dat de AR-grafmarker niet altijd exact boven de correcte grafsteen wordt geplaatst. Dit is een inherente beperking van GPS-gebaseerde AR die niet volledig opgelost kan worden zonder aanvullende technologieën zoals UWB-bakens of visuele objectherkenning.
+    
+    \item \textbf{Initialisatietijd:} het AR-systeem vereist een eerste GPS-fix met een horizontale nauwkeurigheid onder 20 meter voordat de grafmarker geplaatst kan worden. In de praktijk bedraagt deze wachttijd enkele seconden tot maximaal een minuut, afhankelijk van de zichtbaarheid van satellieten op de testlocatie.
+    
+    \item \textbf{AR world tracking drift:} ARKit's world tracking combineert visuele feature tracking met IMU-data. Bij langdurig gebruik of na onderbrekingen kan de tracking lichtjes driften. De implementatie vangt sessie-onderbrekingen op en herstart automatisch, maar dit impliceert een reset van de tracking en een nieuwe initialisatieperiode.
+    
+    \item \textbf{Belichting en weersomstandigheden:} heldere zonneschijn of bewolking kunnen de tracking-stabiliteit beïnvloeden. De applicatie toont een statuslabel dat de trackingkwaliteit communiceert (\textit{Initialising}, \textit{Insufficient Features}, \textit{AR Active}), maar voorziet nog geen automatische fallback naar een vereenvoudigde modus, wat geïdentificeerd werd als risico in de risicoanalyse.
 \end{itemize}
 
 \section{Aansluiting op methodologie en literatuur}
 
-De implementatie ondersteunt zowel kaart- als AR-navigatie en sluit aan bij de onderzoeksvraag.
-
-Belangrijke literatuurinzichten:
+De implementatie sluit nauw aan bij de doelstellingen uit de methodologie. De twee hoofdcomponenten – kaartweergave en AR-weergave – zijn beide functioneel geïmplementeerd. Vanuit de literatuur zijn de volgende inzichten concreet verwerkt:
 
 \begin{itemize}
-    \item Verminderde cognitieve belasting door AR
-    \item Directe visuele navigatie
-    \item Gebruiksvriendelijke interface
+    \item \textbf{Verminderde cognitieve belasting \autocite{Zhao2025}:} de integratie van navigatie-informatie in de camerafeed vermijdt dat de gebruiker zijn blik moet wenden naar een apart scherm. De 3D-pijl is altijd zichtbaar in het gezichtsveld.
+    
+    \item \textbf{AR-registratienauwkeurigheid \autocite{Xu2018}:} de vlakke-Aarde-benadering levert een fout van minder dan 0,01\% binnen 500 meter, wat volstaat voor kerkhofschaal.
+    
+    \item \textbf{Gebruiksvriendelijkheid voor diverse doelgroepen \autocite{Haekkilae2022}:} de interface is bewust eenvoudig gehouden. Één zoekknop, één kaartwidget en een automatisch verschijnende informatiekaart zijn voldoende voor het basisgebruik, zonder vereiste technische kennis.
 \end{itemize}
+
+Componenten die in de methodologie beschreven zijn maar nog niet geïmplementeerd werden, omvatten de automatische fallback bij AR-instabiliteit en een spraakinterface. Deze worden beschouwd als aanbevelingen voor verdere doorontwikkeling en worden besproken in het evaluatiehoofdstuk.

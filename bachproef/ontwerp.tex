@@ -1,0 +1,145 @@
+\chapter{\IfLanguageName{dutch}{Ontwerp}{Design}}%
+\label{ch:ontwerp}
+
+Dit hoofdstuk beschrijft de ontwerpfase van de proof of concept. Op basis van de bevindingen uit de voorbereidingsfase, de risicoanalyse, het gesprek met de gemeente Sint-Gillis-Waas en de terreinanalyse, werden drie ontwerpluiken uitgewerkt: de softwarearchitectuur, de gebruikersinterface en -flow, en de AR-navigatielogica. Deze ontwerpbeslissingen vormden de directe input voor de implementatiefase beschreven in hoofdstuk~\ref{ch:implementatie}.
+
+\section{Architectuur}
+
+\subsection{Platformkeuze}
+
+De applicatie wordt ontwikkeld als een native iOS-applicatie in Swift. Deze keuze is gemotiveerd door vier overwegingen:
+
+\begin{enumerate}
+    \item \textbf{AR-ondersteuning:} Apple's ARKit-framework biedt de meest volwassen en stabiele AR-implementatie beschikbaar op een consumentensmartphone. Het combineert visuele feature tracking, IMU-sensordata en op nieuwere toestellen LiDAR-scanning in één geïntegreerd geheel.
+    \item \textbf{Hardware-integratie:} een native applicatie heeft directe toegang tot alle sensoren van het toestel (camera, GPS, gyroscoop, versnellingsmeter, kompas) zonder de extra abstractielagen die cross-platform alternatieven introduceren.
+    \item \textbf{Prestaties:} AR-toepassingen vereisen een hoge framerate om een vloeiende gebruikerservaring te garanderen. Native code presteert consistent beter dan cross-platform alternatieven voor grafisch intensieve taken.
+    \item \textbf{Doelstelling:} hoewel Android een groter marktaandeel heeft, biedt iOS de meest betrouwbare AR-tracking voor buitenomgevingen, wat voor dit proof of concept de doorslag geeft. 
+\end{enumerate}
+
+\subsection{Componentenarchitectuur}
+
+De applicatie wordt opgebouwd volgens een gelaagde architectuur met een duidelijke scheiding van verantwoordelijkheden. Figuur~\ref{fig:architectuur} geeft een schematisch overzicht van de componenten en hun onderlinge relaties.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{architectuur}
+    \caption[Componentenarchitectuur]{Schematisch overzicht van de componentenarchitectuur.}
+    \label{fig:architectuur}
+\end{figure}
+
+De architectuur bestaat uit vier lagen:
+
+\begin{itemize}
+    \item \textbf{Coördinatorlaag:} één centrale component beheert de volledige schermopbouw en coördineert de communicatie tussen alle subcomponenten. Geen enkel subcomponent heeft een directe referentie naar een ander subcomponent: alle communicatie verloopt via de coördinator. Dit maakt de onderdelen onderling vervangbaar en testbaar.
+    
+    \item \textbf{UI-laag:} drie gespecialiseerde componenten zijn verantwoordelijk voor de weergave. De AR-component beheert de camerasessie en alle virtuele objecten in de scène. De kaartcomponent toont de minikaart als een mooie, embedded weergave. De zoekcomponent biedt het zoekscherm als een hidable venster.
+    
+    \item \textbf{Servicelaag:} de locatieservice levert GPS- en kompasdata aan de rest van de applicatie. De dataservice is verantwoordelijk voor het laden en doorzoeken van grafdata. Beide services zijn via interfaces gedefinieerd, zodat ze eenvoudig vervangen kunnen worden, bijvoorbeeld om de databron te wisselen van een lokaal bestand naar een live API.
+    
+    \item \textbf{Datamodellen:} gedeelde datastructuren die als gemeenschappelijke taal dienen tussen alle lagen. Een grafrecord bevat alle informatie over één graf (naam, coördinaten, sectie, rij, plot). Een navigatiestatus houdt bij welk graf geselecteerd is en wat de huidige afstand en richting daartoe zijn.
+\end{itemize}
+
+Deze architectuur volgt het \textit{Repository-patroon} voor de dataservice en het \textit{Delegate-patroon} voor communicatie tussen componenten, twee gangbare patronen in mobiele softwareontwikkeling die de modulariteit en uitbreidbaarheid van de applicatie bevorderen.
+
+\section{Gebruikersinterface en flow}
+
+\subsection{Ontwerpprincipes}
+
+Het ontwerp van de interface vertrekt vanuit drie kernprincipes:
+
+\begin{enumerate}
+    \item \textbf{Minimale interactie:} de gebruiker moet met zo weinig mogelijk handelingen van het zoeken van een naam tot het staan voor het juiste graf kunnen geraken. Complexe menu's, instellingen of meerstappenflows worden vermeden.
+    \item \textbf{Camera-eerst:} de AR-cameraweergave is de primaire interface. De applicatie opent onmiddellijk op de live camerabeelden, zodat de AR-navigatie altijd beschikbaar is zonder dat de gebruiker een aparte modus hoeft te activeren. Dit sluit aan bij de bevinding dat het verminderen van cognitieve belasting een kernvereiste is voor bruikbare AR-systemen \autocite{Zhao2025}.
+    \item \textbf{Toegankelijkheid:} gegeven de brede doelgroep, inclusief oudere bezoekers die minder vertrouwd zijn met smartphones worden grote, duidelijk leesbare knoppen en voldoende contrast gehanteerd. De applicatie vereist geen technische voorkennis om te gebruiken.
+\end{enumerate}
+
+\subsection{Schermopbouw}
+
+Het hoofdscherm combineert de AR-cameraweergave met een aantal vaste interface-elementen die altijd zichtbaar zijn. Figuur~\ref{fig:wireframe-hoofd} toont een vereenvoudigd wireframe van deze opbouw.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.35\textheight]{wireframe_hoofdscherm.png}
+    \caption[Wireframe hoofdscherm]{Vereenvoudigd wireframe van het hoofdscherm.}
+    \label{fig:wireframe-hoofd}
+\end{figure}
+
+De interface-elementen en hun positionering werden als volgt ontworpen:
+
+\begin{itemize}
+    \item \textbf{Trackingstatus (bovenaan, gecentreerd):} een klein label dat de kwaliteit van de AR-tracking communiceert. Dit element is enkel relevant in de eerste seconden na het openen van de applicatie en trekt daarna zo min mogelijk aandacht.
+    
+    \item \textbf{Minikaart (linksonder):} een kleine satellietkaart die de positie van de gebruiker en het geselecteerde graf toont. De minikaart biedt de ruimtelijke context die pure AR mist: de gebruiker ziet in één oogopslag waar hij zich bevindt ten opzichte van de bestemming. Door op de minikaart te tikken vouwt deze uit naar een volledigschermmodus.
+    
+    \item \textbf{Zoekknop (rechtsonder):} een eenvoudige knop die het zoekscherm opent. De plaatsing rechtsonder maakt de knop eenvoudig bereikbaar met de duim.
+    
+    \item \textbf{Grafinformatiekaart (onderaan, bij selectie):} een informatievenster dat verschijnt zodra een graf geselecteerd wordt. Toont de naam, levensdatums, sectie, rij en plotnummer. Een sluitknop laat de gebruiker de navigatie beëindigen.
+    
+    \item \textbf{Afstandsindicator (rechtsboven, bij selectie):} een label dat de afstand in meters tot het geselecteerde graf toont en continu bijwerkt op basis van de GPS-positie van de gebruiker.
+\end{itemize}
+
+\subsection{Zoekscherm}
+
+Het zoekscherm wordt gepresenteerd als een schuifblad dat omhoog schuift over de cameraweergave. Figuur~\ref{fig:wireframe-zoek} toont het wireframe.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=0.35\textheight]{wireframe_zoekscherm.png}
+    \caption[Wireframe zoekscherm]{Vereenvoudigd wireframe van het zoekscherm als schuifblad.}
+    \label{fig:wireframe-zoek}
+\end{figure}
+
+Dit ontwerp werd gekozen boven een volledigscherm-zoekinterface om twee redenen. Ten eerste blijft de AR-cameraweergave zichtbaar op de achtergrond, wat de gebruiker georiënteerd houdt in de fysieke omgeving. Ten tweede sluit het aan bij het vertrouwde patroon van navigatie-apps zoals Apple Maps en Google Maps, waarmee de meeste gebruikers al vertrouwd zijn.
+
+De zoekfunctie ondersteunt zoeken op naam en sectie. Een lege zoekopdracht toont alle beschikbare graven, zodat bladeren mogelijk is voor gebruikers die de exacte naam niet kennen.
+
+Een zoekfunctie kan altijd volledig vervangen worden en dit wordt enkel gezien als filtering van bestaande data. Als de proof of concept uitgewerkt zou worden tot een volledig afgewerkte productie-applicatie, is het zeer mogelijk en realistisch om een volledigscherm zoekinterface toe te voegen.
+
+\subsection{Userflow}
+
+Figuur~\ref{fig:userflow} toont de volledige flow van het openen van de applicatie tot het bereiken van het geselecteerde graf.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{userflow}
+    \caption[Userflow]{Userflow van openen tot bestemming bereikt.}
+    \label{fig:userflow}
+\end{figure}
+
+De flow is bewust lineair en kort gehouden. Er zijn geen vertakkingen voor instellingen, accountbeheer of onboarding. Een gebruiker die de applicatie voor het eerst opent, kan zonder enige uitleg navigeren naar een graf.
+
+\subsection{Navigatiepijl}
+
+De navigatiepijl is het primaire navigatie-element dat de gebruiker van zijn huidige positie naar het geselecteerde graf leidt. Het ontwerp vertrekt vanuit vier vereisten:
+
+\begin{itemize}
+    \item De pijl moet \textbf{altijd zichtbaar} zijn, ongeacht de kijkrichting van de gebruiker.
+    \item De pijl moet \textbf{driedimensionaal} zijn zodat de gebruiker een ruimtelijk gevoel krijgt van de richting.
+    \item De pijl moet \textbf{real-time roteren} wanneer de gebruiker van richting verandert.
+    \item De pijl mag de \textbf{cameraweergave niet domineren}, zodat de gebruiker zijn omgeving blijft zien.
+\end{itemize}
+
+Om aan de eerste vereiste te voldoen, wordt de pijl op een vaste afstand voor de gebruiker geplaatst en continu herpositioneerd op basis van de kijkrichting. Zo is de pijl altijd in het gezichtsveld zichtbaar: wanneer de gebruiker naar het graf kijkt, wijst de pijl van hem weg richting het graf; wanneer hij van het graf afkijkt, ziet hij de pijl achter zich wijzen. De richting van de pijl wordt voortdurend herberekend op basis van de hoek tussen de huidige positie en de positie van het geselecteerde graf.
+
+\subsection{Grafmarker}
+
+De grafmarker is een virtueel object dat op de exacte GPS-positie van het geselecteerde graf wordt geplaatst en zichtbaar is vanuit verschillende afstanden. Het ontwerp bestaat uit meerdere visuele lagen die elk op een andere afstand hun rol spelen:
+
+\begin{itemize}
+    \item \textbf{Verticale balk (zichtbaar van ver):} een opvallend verticaal element van meerdere meters hoogte dat boven de omgeving uitsteekt. Dit is het eerste element dat de gebruiker opmerkt wanneer hij de juiste richting inslaat. Een dergelijk verticaal baken biedt een betrouwbaarder visueel referentiepunt in een buitenomgeving dan een ankerpunt op de grond \autocite{Zhao2025}.
+    \item \textbf{Naambord (zichtbaar op middellange afstand):} een tekstlabel met de naam en levensdatums van de overledene dat altijd naar de gebruiker gericht is, ongeacht de kijkhoek.
+    \item \textbf{Kubus op de grond (zichtbaar van nabij):} een duidelijk herkenbaar object op grondniveau dat de exacte grafpositie aanduidt zodra de gebruiker dichterbij komt.
+    \item \textbf{Grondring (zichtbaar van heel dichtbij):} een cirkel op grondniveau die de precieze positie van het graf aangeeft wanneer de gebruiker er vlakbij staat.
+\end{itemize}
+
+\subsection{Grondlijn}
+
+Als aanvulling op de navigatiepijl wordt een \textit{virtuele grondlijn} overwogen: een reeks virtuele markeringen op de grond die een visueel pad trekken van de gebruiker naar het graf, vergelijkbaar met de navigatielijn in apps zoals Google Maps maar dan in AR. Dit element verhoogt de intuïtiviteit van de navigatie omdat het de te volgen route letterlijk op de grond aangeeft.
+
+De technische haalbaarheid hiervan is afhankelijk van betrouwbare detectie van het bodemvlak door het AR-systeem. Op een begraafplaats met een onregelmatig oppervlak (gras, verhoogde grafstenen, paden) kan dit uitdagend zijn. Om die reden wordt de grondlijn als optioneel element in het ontwerp opgenomen: indien het bodemvlak betrouwbaar gedetecteerd kan worden, wordt de lijn weergegeven; anders valt het systeem terug op de navigatiepijl alleen.
+
+\subsection{Trackingstatus en fallback}
+
+Het ontwerp voorziet een expliciete communicatie van de AR-trackingkwaliteit aan de gebruiker. Vier situaties worden onderscheiden, van volledig functioneel tot niet beschikbaar. Bij elke status wordt de gebruiker geïnformeerd via een statusaanduiding bovenaan het scherm.
+
+Bij aanhoudende instabiliteit van de AR-tracking kan de gebruiker op elk moment de minikaart uitvouwen naar volledigscherm om verder te navigeren op basis van de kaartweergave. Deze schakeloptie fungeert als de voornaamste fallback bij technische problemen, zoals geïdentificeerd in de risicoanalyse in hoofdstuk~\ref{ch:voorbereiding-analyse}.

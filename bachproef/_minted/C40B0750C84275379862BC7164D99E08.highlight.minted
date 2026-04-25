@@ -1,0 +1,30 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{struct}\PYG{+w}{ }\PYG{n+nc}{GraveRecord}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{Identifiable}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Codable}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nb}{Hashable}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{id}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{String}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{firstName}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{String}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{lastName}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{String}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{birthYear}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{Int}\PYG{p}{?}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{deathYear}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{Int}\PYG{p}{?}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{biography}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{String}\PYG{p}{?}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{latitude}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{Double}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{longitude}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{Double}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{section}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{String}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{row}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{Int}\PYG{p}{?}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{plot}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{Int}\PYG{p}{?}
+
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n+nv}{fullName}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{String}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}}\PYG{l+s+si}{\PYGZbs{}(}\PYG{n}{firstName}\PYG{l+s+si}{)}\PYG{l+s}{ }\PYG{l+s+si}{\PYGZbs{}(}\PYG{n}{lastName}\PYG{l+s+si}{)}\PYG{l+s}{\PYGZdq{}}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n+nv}{lifespan}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{String}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{switch}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{birthYear}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{deathYear}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{b}\PYG{p}{?,}\PYG{+w}{ }\PYG{n}{d}\PYG{p}{?):}\PYG{+w}{ }\PYG{k}{return}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}}\PYG{l+s+si}{\PYGZbs{}(}\PYG{n}{b}\PYG{l+s+si}{)}\PYG{l+s}{ \PYGZhy{} }\PYG{l+s+si}{\PYGZbs{}(}\PYG{n}{d}\PYG{l+s+si}{)}\PYG{l+s}{\PYGZdq{}}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{b}\PYG{p}{?,}\PYG{+w}{ }\PYG{k+kc}{nil}\PYG{p}{):}\PYG{+w}{ }\PYG{k}{return}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}b. }\PYG{l+s+si}{\PYGZbs{}(}\PYG{n}{b}\PYG{l+s+si}{)}\PYG{l+s}{\PYGZdq{}}
+\PYG{+w}{            }\PYG{k}{case}\PYG{+w}{ }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kc}{nil}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{d}\PYG{p}{?):}\PYG{+w}{ }\PYG{k}{return}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}d. }\PYG{l+s+si}{\PYGZbs{}(}\PYG{n}{d}\PYG{l+s+si}{)}\PYG{l+s}{\PYGZdq{}}
+\PYG{+w}{            }\PYG{k}{default}\PYG{p}{:}\PYG{+w}{ }\PYG{k}{return}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}Unknown\PYGZdq{}}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k+kd}{var}\PYG{+w}{ }\PYG{n+nv}{location}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb+bp}{CLLocation}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n+nb+bp}{CLLocation}\PYG{p}{(}\PYG{n}{latitude}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{latitude}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{longitude}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{longitude}\PYG{p}{)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

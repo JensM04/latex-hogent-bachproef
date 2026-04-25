@@ -1,0 +1,15 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{extension}\PYG{+w}{ }\PYG{n+nb+bp}{CLLocationCoordinate2D}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{func}\PYG{+w}{ }\PYG{n+nf}{bearing}\PYG{p}{(}\PYG{n}{to}\PYG{+w}{ }\PYG{n}{other}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb+bp}{CLLocationCoordinate2D}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n+nb}{Double}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{lat1}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{k+kc}{self}\PYG{p}{.}\PYG{n}{latitude}\PYG{+w}{  }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{.}\PYG{n}{pi}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{l+m+mi}{180}
+\PYG{+w}{        }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{lat2}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{other}\PYG{p}{.}\PYG{n}{latitude}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{.}\PYG{n}{pi}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{l+m+mi}{180}
+\PYG{+w}{        }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{dLon}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{other}\PYG{p}{.}\PYG{n}{longitude}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{k+kc}{self}\PYG{p}{.}\PYG{n}{longitude}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{.}\PYG{n}{pi}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{l+m+mi}{180}
+
+\PYG{+w}{        }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{y}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{sin}\PYG{p}{(}\PYG{n}{dLon}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{cos}\PYG{p}{(}\PYG{n}{lat2}\PYG{p}{)}
+\PYG{+w}{        }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{x}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{cos}\PYG{p}{(}\PYG{n}{lat1}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{sin}\PYG{p}{(}\PYG{n}{lat2}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{sin}\PYG{p}{(}\PYG{n}{lat1}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{cos}\PYG{p}{(}\PYG{n}{lat2}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{cos}\PYG{p}{(}\PYG{n}{dLon}\PYG{p}{)}
+
+\PYG{+w}{        }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{bearing}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{atan2}\PYG{p}{(}\PYG{n}{y}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{l+m+mi}{180}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{p}{.}\PYG{n}{pi}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{bearing}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{360}\PYG{p}{).}\PYG{n}{truncatingRemainder}\PYG{p}{(}\PYG{n}{dividingBy}\PYG{p}{:}\PYG{+w}{ }\PYG{l+m+mi}{360}\PYG{p}{)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

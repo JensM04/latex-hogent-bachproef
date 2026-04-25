@@ -1,0 +1,103 @@
+\chapter{\IfLanguageName{dutch}{Voorbereiding en analyse}{Preparation and analysis}}
+\label{ch:voorbereiding-analyse}
+
+Dit hoofdstuk beschrijft de voorbereidende fase van het onderzoek. Voorafgaand aan de eigenlijke ontwikkeling van het proof of concept werden drie activiteiten uitgevoerd: een risicoanalyse, een dataverzamelingsfase en een analyse van de testlocatie. Deze activiteiten legden de feitelijke basis waarop de latere ontwerp- en implementatiebeslissingen werden genomen.
+
+\section{Risicoanalyse}
+
+Voorafgaand aan de ontwikkeling werd een risicoanalyse uitgevoerd. Het doel hiervan was om potentiële knelpunten vroegtijdig te identificeren en per risico een mitigerende maatregel te formuleren, zodat de ontwikkeling zo weinig mogelijk vertraging zou oplopen. De risico's werden ingedeeld in vier categorieën: technische risico's, gebruiksrisico's, contextrisico's en projectrisico's.
+
+\subsection{Technische risico's}
+
+\begin{itemize}
+    \item \textbf{GPS-onnauwkeurigheid op kleine schaal:} een iPhone levert een horizontale GPS-nauwkeurigheid van doorgaans 3 tot 10 meter. Op een begraafplaats waar grafstenen slechts 60 à 80 centimeter uit elkaar staan, volstaat dit niet om de exacte grafsteen te identificeren. Dit risico werd als \textit{hoog} beoordeeld op impact en \textit{zeker} op kans. De mitigerende maatregel bestaat erin de AR-grafmarker visueel prominent te maken (een verticale lichtbalk van 6 meter en een pulserende grondring) zodat de gebruiker ook bij een kleine GPS-afwijking snel de juiste locatie kan herkennen.
+    
+    \item \textbf{ARKit tracking-instabiliteit:} ARKit's world tracking is gebaseerd op een combinatie van visuele feature tracking en IMU-data (versnellingsmeter en gyroscoop). Bij onvoldoende visuele textuur in de omgeving (bijvoorbeeld bij een zeer bewolkte hemel, weinig contrast op het terrein of hevige regenval), kan de tracking degraderen. Dit risico werd als \textit{gemiddeld} beoordeeld: de kans is reëel bij wisselvallig Belgisch weer, maar de impact blijft beperkt zolang de gebruiker de kaartweergave als fallback kan gebruiken. De applicatie communiceert de trackingstatus actief via een statuslabel bovenaan het scherm.
+    
+    \item \textbf{Compatibiliteitsproblemen tussen ARKit-versies:} ARKit evolueert snel en bepaalde functionaliteiten zijn enkel beschikbaar op nieuwere toestellen of iOS-versies. Dit risico werd gemitigeerd door de applicatie te ontwikkelen op basis van \texttt{ARWorldTrackingConfiguration}, die beschikbaar is vanaf iOS 11 en op alle toestellen met een A9-chip of nieuwer, waardoor een brede toestelcompatibiliteit gegarandeerd wordt.
+\end{itemize}
+
+\subsection{Gebruiksrisico's}
+
+\begin{itemize}
+    \item \textbf{Beperkte vertrouwdheid van oudere gebruikers met AR-technologie:} zoals aangetoond in de literatuurstudie, ervaren niet alle gebruikers mobiele applicaties als intuïtief \autocite{Haekkilae2022}. Oudere bezoekers vormen een significante doelgroep op begraafplaatsen en zijn doorgaans minder vertrouwd met AR-interfaces. Dit risico werd gemitigeerd door de interface zo eenvoudig mogelijk te houden: de applicatie opent onmiddellijk op de cameraweergave zonder menu's of instellingen, en vereist slechts één handeling (zoeken en selecteren) om de navigatie te starten.
+    
+    \item \textbf{Veiligheidsrisico's door verminderde aandacht:} een gebruiker die zijn blik richt op het scherm van zijn smartphone kan minder aandacht hebben voor de fysieke omgeving, wat op een begraafplaats kan leiden tot struikelen over grafstenen of paden. Dit risico werd als \textit{laag} ingeschat gezien de beperkte verkeersintensiteit op een begraafplaats, maar het blijft een aandachtspunt voor de gebruikersinstructies bij een eventuele productieversie.
+\end{itemize}
+
+\subsection{Contextrisico's}
+
+\begin{itemize}
+    \item \textbf{Respectvolle omgang met een emotioneel gevoelige omgeving:} een begraafplaats is een plek van rouw en bezinning. Het gebruik van een smartphone met een AR-overlay kan als ongepast worden ervaren door andere bezoekers. Dit risico werd gemitigeerd door de interface discreet te houden: geen geluid, geen opvallende visuele effecten die buiten het scherm zichtbaar zijn, en een interface die snel en efficiënt gebruikt kan worden zonder langdurige aandacht te vereisen.
+    
+    \item \textbf{Privacywetgeving rond persoonsgegevens van overledenen:} namen, geboorte- en overlijdensdata zijn persoonsgegevens die onder de GDPR kunnen vallen, ook wanneer ze betrekking hebben op overledenen, omdat ze indirect aan levende familieleden gelinkt kunnen worden. Dit risico werd gemitigeerd door in het proof of concept uitsluitend gebruik te maken van fictieve mockdata en geen echte persoonsgegevens op te slaan of te verwerken. De juridische analyse hiervan wordt uitgebreid behandeld in hoofdstuk~\ref{ch:juridische-analyse}.
+\end{itemize}
+
+\subsection{Projectrisico's}
+
+\begin{itemize}
+    \item \textbf{Beperkte toegang tot reële data van de gemeente Sint-Gillis-Waas:} dit risico materialiseerde zich effectief tijdens de voorbereidingsfase. Na een gesprek met een medewerker van de gemeente Sint-Gillis-Waas bleek dat de bestaande grafdata beheerd wordt via de interne applicatie WebBGP, waartoe geen externe toegang verleend kon worden. Als gevolg hiervan werd overgegaan tot de aanmaak van een representatieve mockdataset, zoals voorzien als fallback in de methodologie.
+    
+    \item \textbf{Tijdsdruk en iteratieve ontwikkeling:} de combinatie van een literatuurstudie, juridische analyse, technische implementatie en gebruikerstests binnen één academisch jaar vormt een reëel planningsrisico. Dit werd gemitigeerd door een iteratieve ontwikkelaanpak te hanteren waarbij elke iteratie een werkend en testbaar product oplevert, zodat bij tijdsnood een eerdere iteratie als eindproduct kan dienen.
+\end{itemize}
+
+\section{Dataverzameling}
+
+\subsection{Gesprek met de gemeente Sint-Gillis-Waas}
+
+In het kader van de dataverzamelingsfase werd een interview afgenomen met een medewerker van de gemeente Sint-Gillis-Waas, verantwoordelijk voor het beheer van de gemeentelijke begraafplaatsen. Tijdens dit gesprek werd de interne applicatie WebBGP gedemonstreerd. WebBGP is een privéapplicatie ontwikkeld door het bedrijf Cevi, die door de gemeente gebruikt wordt voor het administratief beheer van begraafplaatsen: het registreren van grafconcessies, het bijhouden van persoonsgegevens van overledenen en het beheren van de ruimtelijke indeling van het kerkhof.
+
+Uit het gesprek kwamen een aantal relevante vaststellingen naar voren:
+
+\begin{itemize}
+    \item WebBGP bevat gedetailleerde graflocatiedata met GPS-coördinaten, persoonsgegevens en concessie-informatie, maar is uitsluitend toegankelijk voor gemeentelijke medewerkers.
+    \item Er bestaat geen publieke API of exportfunctie waarmee externe applicaties de data kunnen opvragen.
+    \item De gemeente staat in principe open voor digitale initiatieven die bezoekers helpen bij het lokaliseren van graven, maar een formele datadeling vereist juridische afspraken rond gegevensbescherming die buiten het kader van dit proof of concept vallen.
+\end{itemize}
+
+Deze vaststellingen bevestigden de relevantie van het onderzoek: er is effectief een nood aan betere navigatiemiddelen voor bezoekers.
+\subsection{Aanmaak van de mockdataset}
+
+Aangezien toegang tot de reële WebBGP-data niet verkregen kon worden, werd een representatieve mockdataset aangemaakt. De dataset werd opgesteld in JSON-formaat en bevat acht grafrecords verdeeld over vier secties (A t.e.m. D), met fictieve persoonsgegevens. De GPS-coördinaten in de mockdataset zijn gebaseerd op de werkelijke locatie van het kerkhof van Sint-Gillis-Waas, maar de individuele grafposities werden handmatig ingevoerd op basis van de rasterindeling van het terrein (zie sectie~\ref{sec:testlocatie}).
+
+De keuze voor JSON als dataformaat is bewust: het is een gestandaardiseerd, leesbaar formaat dat eenvoudig te vervangen is door een live API-aanroep. In een productieomgeving zou de lokale JSON-bron in de applicatie vervangen kunnen worden door een \texttt{URLSession}-aanroep naar een endpoint van WebBGP of een vergelijkbaar systeem, zonder wijzigingen in de UI-code of de datamodellen.
+
+\section{Analyse van de testlocatie}
+\label{sec:testlocatie}
+
+\subsection{Situering}
+
+De testlocatie voor dit proof of concept is het gemeentelijk kerkhof van Sint-Gillis-Waas, gelegen in de gemeente Sint-Gillis-Waas in de provincie Oost-Vlaanderen. Het kerkhof is bereikbaar voor het publiek en vormt de primaire testomgeving voor zowel de technische evaluatie van de AR-component als de gebruikerstests beschreven in hoofdstuk~\ref{ch:testen}.
+
+\subsection{Ruimtelijke indeling}
+
+Het kerkhof van Sint-Gillis-Waas heeft een reguliere rasterindeling: de graven zijn georganiseerd in rechte rijen en kolommen, vergelijkbaar met een stratenplan. Deze uniforme structuur heeft zowel voordelen als nadelen voor AR-navigatie:
+
+\begin{itemize}
+    \item \textbf{Voordeel:} de regelmatige indeling maakt het eenvoudig om grafposities te benaderen via rij- en plotnummers, wat de mockdata realistisch houdt. Bovendien biedt de open, rechtlijnige structuur goede zichtlijnen voor de AR-pijl.
+    \item \textbf{Nadeel:} alle rijen lijken sterk op elkaar, wat betekent dat een kleine GPS-afwijking de gebruiker naar de verkeerde rij kan leiden. Dit versterkt het belang van de prominente AR-grafmarker als visueel ankerpunt op de exacte locatie.
+\end{itemize}
+
+\subsection{Obstakels en omgevingsfactoren}
+
+Bij een terreinverkenning van de testlocatie werden de volgende omgevingsfactoren in kaart gebracht die relevant zijn voor de werking van de AR-applicatie:
+
+\begin{itemize}
+    \item \textbf{Bomen en begroeiing:} op het kerkhof staan verspreide bomen, voornamelijk langs de randen van het terrein. Deze kunnen de GPS-ontvangst lokaal beïnvloeden door signaalreflectie, maar vormen geen significante belemmering voor de ARKit visual tracking, aangezien ze voldoende visuele textuur bieden voor feature detection.
+    
+    \item \textbf{Grafmonumenten en stenen:} de aanwezigheid van grafstenen, kruisen en kleine monumenten biedt ARKit rijke visuele ankerpunten voor de world tracking. Dit is een voordeel ten opzichte van omgevingen met weinig textuur, zoals een kale vlakte.
+    
+    \item \textbf{Belichting:} het kerkhof is een open terrein zonder overdekking. Bij helder weer kan directe zonnestraling de camerafeed overbelichten, wat de ARKit feature tracking kan bemoeilijken. Bij bewolkt weer is de belichting egaler en stabieler voor tracking-doeleinden.
+    
+    \item \textbf{GPS-signaal:} door de open ligging van het terrein is de GPS-ontvangst op het kerkhof over het algemeen goed. Enkel in de buurt van de grotere bomen langs de rand kan de horizontale nauwkeurigheid licht verslechteren door multipath-interferentie.
+\end{itemize}
+
+\subsection{Implicaties voor het ontwerp}
+
+De terreinanalyse leidde tot twee concrete ontwerpbeslissingen die in de implementatiefase werden doorgevoerd:
+
+\begin{enumerate}
+    \item \textbf{Prominente verticale marker:} gezien de uniforme rasterindeling van het kerkhof en het risico op GPS-afwijking, werd gekozen voor een grafmarker met een verticale lichtbalk van 6 meter. Dit zorgt ervoor dat de marker zichtbaar is van over meerdere rijen heen, zelfs wanneer de gebruiker zich nog niet in de correcte rij bevindt.
+    
+    \item \textbf{Navigatiepijl op korte afstand:} aangezien het kerkhof relatief compact is en de loopafstanden beperkt zijn tot maximaal enkele honderden meters, werd de navigatiepijl geoptimaliseerd voor gebruik op korte afstand (1,8 meter voor de camera) in plaats van een grootschalige routeweergave. Dit sluit aan bij de bevindingen van \autocite{Zhao2025} dat AR-navigatie het meest effectief is wanneer de informatie direct in de nabije omgeving van de gebruiker wordt getoond.
+\end{enumerate}

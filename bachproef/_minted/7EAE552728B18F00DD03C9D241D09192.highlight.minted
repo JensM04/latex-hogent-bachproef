@@ -1,0 +1,19 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{func}\PYG{+w}{ }\PYG{n+nf}{navigateTo}\PYG{p}{(}\PYG{n}{grave}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{GraveRecord}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{navState}\PYG{p}{.}\PYG{n}{selectedGrave}\PYG{+w}{  }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{grave}
+\PYG{+w}{    }\PYG{n}{minimapVC}\PYG{p}{.}\PYG{n}{selectedGrave}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{grave}
+
+\PYG{+w}{    }\PYG{c+c1}{// Start AR\PYGZhy{}navigatie: bouw pijl en grafmarker}
+\PYG{+w}{    }\PYG{n}{arManager}\PYG{p}{.}\PYG{n}{startNavigation}\PYG{p}{(}\PYG{n}{to}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{grave}\PYG{p}{)}
+
+\PYG{+w}{    }\PYG{c+c1}{// Toon afstand tot doel}
+\PYG{+w}{    }\PYG{n}{updateDistanceLabel}\PYG{p}{(}\PYG{k}{for}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{grave}\PYG{p}{)}
+
+\PYG{+w}{    }\PYG{c+c1}{// Toon grafdetails onderaan}
+\PYG{+w}{    }\PYG{n}{infoCard}\PYG{p}{.}\PYG{n}{configure}\PYG{p}{(}\PYG{n}{with}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{grave}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{showInfoCard}\PYG{p}{()}
+
+\PYG{+w}{    }\PYG{c+c1}{// Centreer minikaart op het geselecteerde graf}
+\PYG{+w}{    }\PYG{n}{minimapVC}\PYG{p}{.}\PYG{n}{centreMap}\PYG{p}{(}\PYG{n}{on}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{grave}\PYG{p}{.}\PYG{n}{coordinate}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{span}\PYG{p}{:}\PYG{+w}{ }\PYG{l+m+mf}{0.0005}\PYG{p}{)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

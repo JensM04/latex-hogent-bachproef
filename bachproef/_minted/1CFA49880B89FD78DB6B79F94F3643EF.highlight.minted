@@ -1,0 +1,10 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{func}\PYG{+w}{ }\PYG{n+nf}{worldOffset}\PYG{p}{(}\PYG{n}{from}\PYG{+w}{ }\PYG{n}{origin}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb+bp}{CLLocationCoordinate2D}\PYG{p}{,}
+\PYG{n}{to}\PYG{+w}{ }\PYG{n}{target}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb+bp}{CLLocationCoordinate2D}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{x}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{Float}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z}\PYG{p}{:}\PYG{+w}{ }\PYG{n+nb}{Float}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{mPerLat}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{111\PYGZus{}320.0}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{mPerLon}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{111\PYGZus{}320.0}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{cos}\PYG{p}{(}\PYG{n}{origin}\PYG{p}{.}\PYG{n}{latitude}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{.}\PYG{n}{pi}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{l+m+mi}{180}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{x}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb}{Float}\PYG{p}{((}\PYG{n}{target}\PYG{p}{.}\PYG{n}{longitude}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{origin}\PYG{p}{.}\PYG{n}{longitude}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{mPerLon}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{z}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb}{Float}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{p}{(}\PYG{n}{target}\PYG{p}{.}\PYG{n}{latitude}\PYG{+w}{  }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{origin}\PYG{p}{.}\PYG{n}{latitude}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{mPerLat}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{x}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z}\PYG{p}{)}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}
