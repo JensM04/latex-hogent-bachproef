@@ -1,2 +1,171 @@
-\chapter{Juridische en ethische analyse}%
+\chapter{\IfLanguageName{dutch}{Juridische en ethische analyse}{Legal and ethical analysis}}%
 \label{ch:juridische-analyse}
+
+Naast de technische en functionele aspecten van de proof of concept is het noodzakelijk om rekening te houden met de juridische en ethische implicaties van het gebruik van persoonsgegevens binnen de applicatie. In het bijzonder is dit relevant omdat de applicatie gegevens verwerkt die gelinkt zijn aan identificeerbare personen, zoals namen, geboortedata en overlijdensdata. Binnen de Europese context valt dit onder de regelgeving van de General Data Protection Regulation (GDPR), die strikte richtlijnen oplegt rond het verzamelen, verwerken en opslaan van persoonsgegevens.
+
+Dit hoofdstuk behandelt de toepasselijkheid van de GDPR op de verwerkte data, de specifieke Belgische wetgeving rond het rijksregisternummer, de rolverdeling tussen de betrokken partijen, en de implicaties voor zowel de huidige proof of concept als een eventuele productieomgeving. Ten slotte worden ethische aandachtspunten besproken die verder gaan dan de strikte juridische vereisten.
+
+\section{Toepasselijkheid van de GDPR}
+
+\subsection{Wat is de GDPR?}
+
+De General Data Protection Regulation (Verordening (EU) 2016/679) is een Europese verordening die op 25 mei 2018 van kracht werd en rechtstreeks van toepassing is in alle EU-lidstaten, waaronder België. De GDPR vervangt de vorige Europese richtlijn inzake gegevensbescherming (Richtlijn 95/46/EG) en legt striktere verplichtingen op aan alle organisaties die persoonsgegevens verwerken \autocite{EuroparlGDPR2016}.
+
+In België werd de GDPR aangevuld door de nationale Wet van 30 juli 2018 betreffende de bescherming van natuurlijke personen met betrekking tot de verwerking van persoonsgegevens. Deze wet regelt een aantal zaken die de GDPR aan de lidstaten overlaat, zoals de minimumleeftijd voor toestemming (vastgesteld op 13 jaar in België) en specifieke uitzonderingen voor wetenschappelijk en historisch onderzoek \autocite{BelgischeWet2018}. Het toezicht op de naleving van de GDPR in België wordt uitgeoefend door de Gegevensbeschermingsautoriteit (GBA).
+
+\subsection{Persoonsgegevens van overledenen}
+
+Een centrale juridische vraag voor dit proof of concept is of de verwerkte data, in dit geval namen, geboortedata en overlijdensdata van overledenen, onder de GDPR valt.
+
+Overweging 27 van de GDPR bepaalt uitdrukkelijk dat de verordening \textit{niet van toepassing is op de persoonsgegevens van overleden personen} \autocite{GDPROverweging27}. Dit standpunt wordt bevestigd door Belgisch recht: data van overledenen en anonieme data worden niet beschouwd als persoonsgegevens in de zin van de GDPR. Ook op Europees niveau is dit consistent: de GDPR definieert persoonsgegevens als gegevens die betrekking hebben op een levende natuurlijke persoon; gegevens van overleden personen vallen hier dus niet onder.
+
+Dit lijkt op het eerste gezicht de juridische situatie te vereenvoudigen. Toch zijn er twee nuances waarmee we rekening moeten houden.
+
+\textbf{Eerste nuance: indirecte identificatie van levenden.} Hoewel de gegevens van de overledene zelf niet beschermd zijn, kunnen ze indirect informatie onthullen over levende familieleden. De naam en geboorteplaats van een overledene kunnen bijvoorbeeld worden gecombineerd met publiek beschikbare genealogische databases om familierelaties te reconstrueren. In dat geval kunnen de gegevens alsnog als persoonsgegevens van levenden worden beschouwd, waarvoor de GDPR wel geldt.
+
+\textbf{Tweede nuance: de gebruiker van de applicatie.} De applicatie zelf verwerkt ook gegevens van de \textit{levende} gebruiker: zijn GPS-locatie en zijn kijkrichting worden continu verwerkt door de AR-component. Deze gegevens zijn persoonsgegevens in de zin van de GDPR en vallen volledig onder haar beschermingsregime. In het huidige proof of concept worden deze gegevens niet opgeslagen of doorgezonden, maar in een productieomgeving dient hier expliciet rekening mee gehouden te worden.
+
+\subsection{De vijf beginselen van rechtmatige verwerking}
+
+Wanneer verwerking van persoonsgegevens plaatsvindt, of het nu gaat om de grafdata of de locatiegegevens van de gebruiker, dient deze te voldoen aan de beginselen van artikel 5 van de GDPR. Tabel~\ref{tab:gdpr-beginselen} geeft een overzicht van deze principes en hun toepassing op de applicatie.
+
+\begin{table}[h]
+    \centering
+    \caption[GDPR-principes toegepast op de applicatie]{Toepassing van de GDPR-principes (art. 5 GDPR) op het proof of concept en een productieomgeving.}
+    \label{tab:gdpr-beginselen}
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabular}{p{3cm} p{4.5cm} p{4.5cm}}
+        \hline
+        \textbf{Principe} & \textbf{Proof of concept} & \textbf{Productieomgeving} \\
+        \hline
+        Rechtmatigheid & Mockdata; geen echte verwerking & Basis: taak van algemeen belang (art. 6.1.e GDPR) \\
+        \hline
+        Doelbinding & Enkel navigatie; geen ander gebruik & Navigatie is het enige toegestane doel \\
+        \hline
+        Dataminimalisatie & Alleen naam, datums, locatie; geen RRN & Zelfde minimale set; geen rijksregisternummer \\
+        \hline
+        Juistheid & Mockdata is fictief & Gemeente verantwoordelijk voor correctheid data \\
+        \hline
+        Opslagbeperking & Geen opslag; lokaal JSON-bestand & Bewaartermijn bepalen in samenwerking met gemeente \\
+        \hline
+        Integriteit \& vertrouwelijkheid & Geen externe overdracht & Versleuteling, toegangscontrole en audit logging vereist \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\section{Wettelijke basis voor verwerking in een productieomgeving}
+
+Elke verwerking van persoonsgegevens vereist een geldige wettelijke basis of rechtsgrond zoals opgesomd in artikel 6 van de GDPR. Voor een productieversie van de applicatie zijn twee rechtsgronden relevant.
+
+\subsection{Taak van algemeen belang (art. 6.1.e GDPR)}
+
+De meest voor de hand liggende rechtsgrond voor een gemeente die grafdata beschikbaar stelt via een navigatieapplicatie is artikel 6, lid 1, onder e) van de GDPR: \textit{de verwerking is noodzakelijk voor de vervulling van een taak van algemeen belang of van een taak in het kader van de uitoefening van het openbaar gezag}. Het beheren van begraafplaatsen is een wettelijke taak van Belgische gemeenten, vastgelegd in het Nieuwe Gemeentedecreet. Het faciliteren van de toegankelijkheid van begraafplaatsen voor bezoekers kan worden beschouwd als een verlengde van deze taak van algemeen belang.
+
+Zoals de Nederlandse Autoriteit Persoonsgegevens stelt, is de verwerking van persoonsgegevens noodzakelijk om een publieke taak goed te kunnen vervullen, en moet het voor mensen duidelijk zijn dat persoonsgegevens worden verwerkt om die specifieke wettelijke taak uit te oefenen. Voor de gemeente Sint-Gillis-Waas zou dit betekenen dat het beschikbaar stellen van grafdata voor navigatiedoeleinden expliciet moet worden verankerd in een gemeentelijk reglement of besluit.
+
+\subsection{Toestemming (art. 6.1.a GDPR)}
+
+Een alternatieve wettelijke basis is de toestemming van de betrokkenen. In de context van begraafplaatsnavigatie zijn de betrokkenen echter de overledenen zelf (die geen toestemming kunnen geven) of hun nabestaanden. Het vragen van toestemming aan alle nabestaanden voor het publiceren van grafdata is in de praktijk niet haalbaar en ook niet vereist, gegeven dat de GDPR overledenen niet beschermt. Voor de locatiegegevens van de \textit{gebruiker} van de applicatie is toestemming wel vereist en wordt deze al gevraagd via de iOS-runtime permissiedialoog bij het opstarten van de applicatie.
+
+\section{Het rijksregisternummer: een bijzonder geval}
+
+Tijdens het interview met de medewerker van de gemeente Sint-Gillis-Waas werd vermeld dat het interne systeem WebBGP het rijksregisternummer gebruikt als identifier voor grafrecords. Dit roept een belangrijke juridische vraag op: mag een externe navigatieapplicatie dit nummer verwerken?
+
+Het antwoord is duidelijk \textbf{nee}. Het rijksregisternummer begaat in België een bijzondere wettelijke bescherming die verder gaat dan de GDPR. In de GDPR is het rijksregisternummer niet opgenomen als gevoelig persoonsgegeven, maar blijft de verwerking ervan bij wet verboden op basis van de wet van 8 augustus 1983 tot regeling van een rijksregister van natuurlijke personen. De verwerking van het rijksregisternummer is in principe verboden; een machtiging van het Sectoraal Comité van het Rijksregister of van de dienst Rijksregister van de FOD Binnenlandse Zaken is vereist.
+
+Deze machtiging wordt enkel verleend aan Belgische openbare of private instellingen die aantonen dat ze de informatie nodig hebben voor het vervullen van een wettelijke taak van algemeen belang. Een navigatieapplicatie die door eindgebruikers op hun persoonlijke smartphone wordt gebruikt, voldoet niet aan deze voorwaarden.
+
+De interne applicatie WebBGP gebruikt zoals vernoemd het rijksregisternummer als identifier. Dit is 
+juridisch toegestaan omdat WebBGP uitsluitend door gemeentelijke medewerkers 
+wordt gebruikt in het kader van de wettelijke begraafplaatsbeheerstaak van de 
+gemeente, waarvoor een machtiging geldt op basis van artikel 5 van de Wet van 
+8 augustus 1983. Deze machtiging geldt echter enkel voor intern gebruik door 
+gemachtigde medewerkers en kan niet worden uitgebreid naar een publieke applicatie 
+die op de persoonlijke smartphone van een burger draait.
+
+De conclusie voor dit proof of concept is dan ook duidelijk: \textbf{het rijksregisternummer mag onder geen beding worden opgenomen in de applicatie}. Als zoekfilter kan worden volstaan met naam, voornaam, geboortejaar en sectie/rij/plot. Dit is ook het standpunt dat werd ingenomen in de implementatie van dit proof of concept, waar het rijksregisternummer bewust buiten het datamodel werd gehouden.
+
+\section{Rolverdeling: verwerkingsverantwoordelijke en verwerker}
+
+In de GDPR wordt een onderscheid gemaakt tussen de \textit{verwerkingsverantwoordelijke} (de partij die het doel en de middelen van de verwerking bepaalt) en de \textit{verwerker} (de partij die de data namens de verwerkingsverantwoordelijke verwerkt). In het kader van een productieomgeving is deze rolverdeling als volgt:
+
+\begin{itemize}
+    \item \textbf{Gemeente Sint-Gillis-Waas:} verwerkingsverantwoordelijke. De gemeente is eigenaar van de grafdata, bepaalt welke gegevens beschikbaar worden gesteld en voor welk doel. Zij zijn verantwoordelijk voor de correctheid van de data en moeten een rechtsgrond kunnen aantonen voor de verwerking.
+    \item \textbf{Cevi (ontwikkelaar van WebBGP):} verwerker namens de gemeente voor het beheer van de interne grafdata.
+    \item \textbf{Ontwikkelaar van de navigatieapplicatie:} verwerker van de locatiegegevens van de gebruiker en van de grafdata die via de API wordt opgevraagd. Een verwerkersovereenkomst met de gemeente is wettelijk vereist (art. 28 GDPR).
+    \item \textbf{Apple (iOS-platform):} subverwerker voor de verwerking van GPS- en kameraccessdata op het toestel van de gebruiker. Apple's verwerking valt onder hun eigen privacybeleid en de standaard iOS-permissiemechanismen.
+\end{itemize}
+
+Voor de overgang van proof of concept naar productie dient een formele verwerkersovereenkomst te worden opgesteld tussen de gemeente en de applicatieontwikkelaar, waarin de aard, het doel, de duur en de categorie van de verwerkte gegevens worden vastgelegd (art. 28, lid 3 GDPR).
+
+\section{Data Protection Impact Assessment (DPIA)}
+
+Artikel 35 van de GDPR verplicht verwerkingsverantwoordelijken om een Data Protection Impact Assessment (DPIA) uit te voeren wanneer een verwerking waarschijnlijk een hoog risico inhoudt voor de rechten en vrijheden van natuurlijke personen. Een DPIA is onder andere verplicht bij systematische monitoring van een publiek toegankelijk gebied op grote schaal.
+
+Een begraafplaatsnavigatie-applicatie die gebruik maakt van GPS-tracking en een AR-overlay kan worden beschouwd als een systeem dat de locatie van gebruikers op een publiek toegankelijk terrein monitort. Hoewel de schaal van dit proof of concept beperkt is, dient in een productieomgeving te worden onderzocht of een DPIA vereist is. De Gegevensbeschermingsautoriteit heeft bovendien bepaald dat bepaalde Belgische overheidsinstanties verplicht zijn een DPIA uit te voeren voor bepaalde verwerkingen \autocite{GBABelgie}.
+
+In het kader van dit proof of concept werd geen DPIA uitgevoerd, aangezien de applicatie uitsluitend werkt met mockdata en locatiegegevens die niet worden opgeslagen of doorgezonden. Bij een uitrol naar een reële omgeving is een DPIA echter een essentiële stap voorafgaand aan de ingebruikname.
+
+\section{Veilige data voor de applicatie}
+
+Op basis van de juridische analyse kunnen de volgende categorieën van data worden onderscheiden op basis van hun toelaatbaarheid in de applicatie.
+
+\begin{table}[h]
+    \centering
+    \caption[Datatypes en juridische toelaatbaarheid]{Overzicht van datatypes, hun juridische status en toelaatbaarheid in de navigatieapplicatie.}
+    \label{tab:datatypes}
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabular}{p{3.5cm} p{3cm} p{5cm}}
+        \hline
+        \textbf{Datatype} & \textbf{Juridische status} & \textbf{Toelaatbaar in applicatie?} \\
+        \hline
+        Naam overledene & Niet beschermd (overledene) & Ja, mits doelbinding navigatie \\
+        \hline
+        Geboorte- en overlijdensdatum & Niet beschermd (overledene) & Ja, mits doelbinding navigatie \\
+        \hline
+        GPS-locatie graf & Niet beschermd (overledene) & Ja, kernfunctionaliteit \\
+        \hline
+        Sectie / rij / plot & Niet beschermd (overledene) & Ja, kernfunctionaliteit \\
+        \hline
+        Rijksregisternummer & Wettelijk verboden (Wet 1983) & \textbf{Nee, absoluut verboden} \\
+        \hline
+        Biografie / foto & Persoonsgegevens nabestaanden & Alleen met expliciete toestemming \\
+        \hline
+        GPS-locatie gebruiker & Persoonsgegevens (levende) & Ja, mits toestemming en niet opgeslagen \\
+        \hline
+    \end{tabular}
+\end{table}
+
+De tabel maakt duidelijk dat de kern van de applicatie, naam, datums, graflocatie en sectie-informatie, juridisch gezien veilig is om te verwerken voor navigatiedoeleinden. Het rijksregisternummer is categorisch uitgesloten. Biografieën en foto's van overledenen vereisen extra aandacht: hoewel de overledene zelf niet beschermd is, kunnen deze gegevens betrekking hebben op levende familieleden of kunnen zij als gevoelige informatie worden beschouwd in de zin van de nabestaanden.
+
+\section{Ethische overwegingen}
+
+Naast de strikte juridische vereisten zijn er ethische overwegingen die verder gaan dan wat de wet vereist maar die essentieel zijn voor een respectvolle implementatie in de context van een begraafplaats.
+
+\subsection{Respect voor de emotionele context}
+
+Een begraafplaats is een plek van rouw, herdenking en bezinning. Het gebruik van een smartphone met een AR-overlay kan door andere bezoekers als ongepast worden ervaren. Zoals aangetoond in de literatuurstudie, zijn rust en sereniteit kernwaarden die bezoekers associëren met een begraafplaats \autocite{Haekkilae2022}. De applicatie dient daarom zo te zijn ontworpen dat ze discreet en snel gebruikt kan worden: geen geluid, geen opvallende visuele effecten, en een interface die minimale aandacht vraagt.
+
+\subsection{Toegankelijkheid en inclusiviteit}
+
+Zoals beschreven in de literatuurstudie, vormen oudere bezoekers een significante doelgroep op begraafplaatsen \autocite{Haekkilae2022}. Een ethisch verantwoorde applicatie dient toegankelijk te zijn voor alle leeftijdsgroepen, inclusief mensen met beperkte digitale vaardigheden of visuele beperkingen. Dit impliceert grote lettertypes, hoog contrast, en een zo eenvoudig mogelijke gebruikersstroom: vereisten die reeds zijn opgenomen in de ontwerpprincipes van deze proof of concept.
+
+\subsection{Transparantie tegenover gebruikers}
+
+Gebruikers van de applicatie dienen te weten welke gegevens worden verwerkt en voor welk doel. In een productieomgeving dient de applicatie te beschikken over een privacyverklaring die duidelijk communiceert welke locatiegegevens worden verwerkt, hoe lang deze worden bewaard (in de proof of concept: niet bewaard), en met wie ze worden gedeeld (in de proof of concept: niemand). In een productieomgeving zal dit hoogstwaarschijnlijk zo blijven. De applicatie heeft geen enkele nood aan het opslaan van locatiegegevens van de gebruiker.
+
+\subsection{Digitale toegankelijkheid van de dood}
+
+Ten slotte is er een breder ethisch debat over de digitalisering van de omgang met de dood. Het publiek maken van graflocaties via een digitale applicatie kan worden gezien als een democratisering van toegang tot herdenkingsinformatie, maar ook als een potentiële aantasting van de privacy van nabestaanden die er de voorkeur aan geven dat bepaalde graven niet eenvoudig vindbaar zijn. Deze proof of concept neemt het standpunt in dat publiek beschikbare informatie zoals namen en locaties die fysiek leesbaar zijn op de grafsteen ook digitaal toegankelijk mogen worden gemaakt, maar dat extra gevoelige informatie (zoals biografieën, foto's of familierelaties) enkel na expliciete toestemming van nabestaanden mag worden gepubliceerd.
+
+\section{Conclusie van de juridische analyse}
+
+De juridische analyse toont aan dat de kerndoelstelling van dit proof of concept  het navigeren naar een graf op basis van naam en locatie, juridisch haalbaar is, zowel in de huidige PoC-vorm als in een productieomgeving. De voornaamste conclusies zijn:
+
+\begin{enumerate}
+    \item Gegevens van overledenen (naam, datums, locatie) vallen buiten de beschermingssfeer van de GDPR, maar vereisen zorgvuldig gebruik uit respect voor de context en mogelijke indirecte link met levende familieleden.
+    \item Het rijksregisternummer mag nooit worden verwerkt in de applicatie; de wet van 8 augustus 1983 verbiedt dit zonder voorafgaande machtiging.
+    \item De locatiegegevens van de gebruiker zijn persoonsgegevens die wel onder de GDPR vallen; in het proof of concept worden deze niet opgeslagen, wat de juridische risico's minimaliseert.
+    \item Voor een productieomgeving zijn een verwerkersovereenkomst met de gemeente, een privacyverklaring en mogelijk een DPIA vereiste stappen voorafgaand aan ingebruikname.
+    \item De ethische dimensie van de applicatie gaat verder dan het recht: respect voor de emotionele context, toegankelijkheid voor alle doelgroepen en transparantie tegenover gebruikers zijn essentiële vereisten voor een verantwoorde implementatie.
+\end{enumerate}
