@@ -225,6 +225,7 @@ De cruciale instelling is \texttt{worldAlignment = .gravityAndHeading}. Dit uitl
 Dit stemt overeen met het WGS-84 geografische coördinatenstelsel en maakt directe conversie van GPS-coördinaten naar AR-wereldposities mogelijk zonder extra rotatieberekeningen.
 
 \subsection{GPS naar AR-coördinaten: de vlakke-Aarde-benadering}
+\label{sec:gpsconversie}
 
 Een centrale technische uitdaging in buitenomgevings-AR is de omzetting van WGS-84 GPS-coördinaten naar het lokale Cartesische coördinatenstelsel van ARKit. De in deze implementatie gebruikte methode is de \textit{vlakke-Aarde-benadering}:
 
@@ -608,6 +609,76 @@ De huidige implementatie heeft een aantal technische beperkingen die relevant zi
     
     \item \textbf{Belichting en weersomstandigheden:} heldere zonneschijn of bewolking kunnen de tracking-stabiliteit beïnvloeden. De applicatie toont een statuslabel dat de trackingkwaliteit communiceert (\textit{Initialising}, \textit{Insufficient Features}, \textit{AR Active}), maar voorziet nog geen automatische fallback naar een vereenvoudigde modus, wat geïdentificeerd werd als risico in de risicoanalyse.
 \end{itemize}
+
+\section{Platformonafhankelijkheid en overdraagbaarheid}
+\label{sec:platform}
+
+De proof of concept werd ontwikkeld als een native iOS-applicatie op basis van ARKit. Deze platformkeuze is gemotiveerd in hoofdstuk~\ref{ch:ontwerp}, maar roept tegelijk een relevante vraag op: is het concept ook realiseerbaar op andere platformen, in het bijzonder op Android-toestellen die wereldwijd een groter marktaandeel hebben? Dit is een essentiële vraag voor de haalbaarheid van een productieomgeving, waarbij de applicatie beschikbaar moet zijn voor een zo breed mogelijk publiek.
+
+Dit onderdeel toont aan dat alle technische componenten van dit proof of concept een directe equivalent hebben op het Android-platform, en dat een cross-platform implementatie technisch haalbaar is zonder de kernfunctionaliteit op te geven.
+
+\subsection{ARCore: het Android-equivalent van ARKit}
+
+Op Android-toestellen wordt AR-tracking verzorgd door \textbf{ARCore}, Google's platform voor het bouwen van augmented reality-toepassingen. ARCore biedt dezelfde drie fundamentele mogelijkheden als ARKit:
+
+\begin{itemize}
+    \item \textbf{Motion tracking:} ARCore bepaalt continu de positie en oriëntatie van het toestel in de ruimte via een combinatie van camerabeelden en IMU-sensordata (versnellingsmeter en gyroscoop) \autocite{GoogleARCore2024}.
+    \item \textbf{Environmental understanding:} ARCore detecteert horizontale en verticale vlakken in de omgeving, vergelijkbaar met ARKit's plane detection.
+    \item \textbf{Geospatial API:} ARCore biedt via de Geospatial API GPS-gebaseerde werelduitlijning, waardoor virtuele objecten op basis van GPS-coördinaten in de echte wereld geplaatst kunnen worden. Dit is exact de functionaliteit die in deze proof of concept gebruikt wordt voor de grafmarker en de navigatiepijl \autocite{Google2023}.
+\end{itemize}
+
+De werelduitlijning die in deze proof of concept gebruikt wordt via \texttt{ARWorldTrackingConfiguration.worldAlignment = .gravityAndHeading} (ARKit) heeft een directe Android-tegenhanger: ARCore's \texttt{GeospatialPose} API combineert GPS, kompas en visuele tracking om een uitgelijnde wereldruimte te creëren die overeenkomt met geografische coördinaten. De vlakke-Aarde-conversie van GPS naar lokale AR-coördinaten, beschreven in sectie~\ref{sec:gpsconversie}, is platformonafhankelijke wiskunde die identiek toepasbaar is in een Android-implementatie.
+
+ARCore is beschikbaar op meer dan 1 miljard Android-toestellen die Android 7.0 of hoger draaien \autocite{GoogleARCore2024}. Dit betekent dat het overgrote deel van de actieve Android-smartphones in staat is om dezelfde AR-navigatiefunctionaliteit uit te voeren als het iOS proof of concept.
+
+\subsection{Cross-platform ontwikkeling via Unity AR Foundation}
+
+Een productieversie van de applicatie hoeft niet in twee afzonderlijke codebases te worden ontwikkeld. \textbf{Unity AR Foundation} is een cross-platform framework dat een geunificeerde API biedt voor zowel ARKit (iOS) als ARCore (Android) \autocite{Technologies2024}. De ontwikkelaar schrijft de AR-logica één keer in C\# -> AR Foundation vertaalt deze automatisch naar de native ARKit- of ARCore-aanroepen afhankelijk van het doelplatform.
+
+Tabel~\ref{tab:platform-vergelijking} geeft een overzicht van hoe de technische componenten van dit proof of concept zich verhouden tussen de iOS-implementatie en een equivalente Android- of cross-platform implementatie.
+
+\begin{table}[h]
+    \centering
+    \caption[Platformvergelijking iOS en Android]{Vergelijking van de technische componenten van het proof of concept tussen iOS (ARKit) en Android (ARCore), en via het cross-platform Unity AR Foundation framework.}
+    \label{tab:platform-vergelijking}
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabular}{p{3.5cm} p{3.5cm} p{3.5cm}}
+        \hline
+        \textbf{Component} & \textbf{iOS (dit PoC)} & \textbf{Android / Cross-platform} \\
+        \hline
+        AR-framework & ARKit & ARCore \\
+        \hline
+        Werelduitlijning & \texttt{.gravityAndHeading} & ARCore Geospatial API \\
+        \hline
+        3D-rendering & SceneKit & ARCore + OpenGL / Unity \\
+        \hline
+        GPS en kompas & CoreLocation & Android Location API \\
+        \hline
+        Kaartweergave & MapKit & Google Maps SDK / OSMDroid \\
+        \hline
+        Programmeertaal & Swift & Kotlin / Java / C\# (Unity) \\
+        \hline
+        Cross-platform optie & --- & Unity AR Foundation (iOS + Android) \\
+        \hline
+        Minimale OS-versie & iOS 11+ & Android 7.0+ \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Elk onderdeel van de iOS-implementatie heeft een functioneel equivalent op Android. De kernlogica, GPS-coördinaten omzetten naar AR-wereldposities, een 3D-navigatiepijl die per frame de richting bijwerkt, en een world-locked grafmarker, is in beide omgevingen technisch identiek realiseerbaar. Het enige fundamentele verschil is de gebruikte programmeertaal en het framework, niet de onderliggende concepten.
+
+\subsection{Praktische haalbaarheid}
+
+Onderzoek bevestigt dat ARCore-gebaseerde buitennavigatie op Android dezelfde nauwkeurigheid en gebruikerservaring kan bieden als ARKit op iOS. Zo tonen studies aan dat locatiegebonden AR-navigatiesystemen op Android met ARCore vergelijkbare resultaten behalen als op iOS \autocite{Xu2018}. ARCore is bovendien beschikbaar als SDK voor meerdere ontwikkelomgevingen: native Android (Kotlin/Java), Unity, Unreal Engine en zelfs het web via WebXR \autocite{GoogleARCore2024}.
+
+Voor een productieomgeving zijn er twee realistische implementatiepaden:
+
+\begin{enumerate}
+    \item \textbf{Native Android-applicatie} in Kotlin, waarbij alle componenten van dit proof of concept worden herbouwd met ARCore, de Android Location API en de Google Maps SDK. Dit pad biedt de beste prestaties maar vereist een aparte codebase naast de iOS-applicatie.
+    \item \textbf{Cross-platform applicatie} via Unity AR Foundation, waarbij één codebase zowel iOS als Android ondersteunt. Dit is de meest efficiënte aanpak voor een productieomgeving met beperkte ontwikkelcapaciteit, ten koste van een lichte performantiereductie ten opzichte van native code.
+\end{enumerate}
+
+De conclusie is duidelijk: het proof of concept dat in dit onderzoek werd ontwikkeld, is niet iOS-exclusief van aard. De onderliggende technologie, concepten en navigatielogica zijn volledig overdraagbaar naar het Android-platform, en een cross-platform implementatie is technisch haalbaar met bestaande, volwassen frameworks. De keuze voor iOS in dit proof of concept is een pragmatische beslissing gebaseerd op de beschikbaarheid van ARKit als het meest stabiele AR-framework voor buitenomgevingen, niet een architecturale beperking van het concept zelf.
 
 \section{Aansluiting op methodologie en literatuur}
 
