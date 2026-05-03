@@ -47,7 +47,7 @@ Deze aanpak laat toe om ARKit's camerasessie onmiddellijk te starten bij het ope
 
 \section{Softwarearchitectuur}
 
-De architectuur van de applicatie is opgesplitst in afzonderlijke lagen, overeenkomstig het Repository-patroon en het principe van \textit{separation of concerns}. Elke laag is verantwoordelijk voor één domein en communiceert met andere lagen via Swift-protocollen (delegates). Dit maakt de code testbaar en uitbreidbaar: de databron kan bijvoorbeeld vervangen worden door een live REST API zonder wijzigingen in de UI-code. Dit kan belangrijk zijn voor toekomstig gebruik van de app door bijvoorbeeld apis te gebruiken die data ophalen van verschillende gemeenten.
+De architectuur van de applicatie is opgesplitst in afzonderlijke lagen, overeenkomstig het Repository-patroon en het principe van \textit{separation of concerns}. Elke laag is verantwoordelijk voor één domein en communiceert met andere lagen via Swift-protocollen (delegates). Dit maakt de code testbaar en uitbreidbaar: de databron kan bijvoorbeeld vervangen worden door een live REST API zonder wijzigingen in de UI-code. Dit kan belangrijk zijn voor toekomstig gebruik van de app door bijvoorbeeld APIs te gebruiken die data ophalen van verschillende gemeenten.
 
 \subsection{Datamodellen (Models.swift)}
 
@@ -442,6 +442,25 @@ De vier componenten dienen elk een afzonderlijk doel:
     \item \textbf{Billboard-naambord} – een \texttt{SCNText}-object met naam en levensdatums, uitgerust met een \texttt{SCNBillboardConstraint} zodat het altijd naar de camera gedraaid is. De lettertypegrootte van 0,38 wereldeenheden zorgt voor leesbaarheid vanaf circa 15 meter.
 \end{itemize}
 
+\subsection{Opacity-beheer bij tracking-instabiliteit}
+
+De \texttt{ARSessionManager} biedt een \texttt{setSceneOpacity(\_:)}-methode die door de \texttt{ViewController} wordt aangeroepen wanneer de AR-trackingkwaliteit wijzigt. Bij tracking-degradatie worden de pijl en de grafmarker gedeeltelijk transparant gemaakt via een vloeiende animatie:
+
+\begin{listing}[H]
+    \begin{minted}{swift}
+        func setSceneOpacity(_ opacity: CGFloat) {
+            SCNTransaction.begin()
+            SCNTransaction.animationDuration = 0.4
+            arrowNode?.opacity       = opacity
+            graveMarkerNode?.opacity = opacity
+            SCNTransaction.commit()
+        }
+    \end{minted}
+    \caption[Opacity-beheer AR-nodes]{Aanpassing van de opacity van AR-nodes bij tracking-instabiliteit.}
+\end{listing}
+
+Het dimmen van de AR-objecten geeft de gebruiker een duidelijk visueel signaal dat de AR-inhoud tijdelijk minder betrouwbaar is, zonder de objecten volledig te verbergen. Wanneer tracking herstelt, wordt de opacity terug op 1.0 gezet.
+
 \section{UI-componenten}
 
 \subsection{ViewController – centrale coördinator}
@@ -455,6 +474,7 @@ De vier componenten dienen elk een afzonderlijk doel:
     \item \textbf{Zoekknop (FAB)} – rechtsbenedenhoek.
     \item \textbf{Trackingstatus-label} – bovenaan gecentreerd, communiceert de AR-trackingkwaliteit.
     \item \textbf{Afstandslabel} – rechtsboven, toont de afstand tot het geselecteerde graf.
+    \item \textbf{Fallback-banner} – bovenaan, verschijnt automatisch bij aanhoudende tracking-instabiliteit.
 \end{enumerate}
 
 Wanneer de gebruiker een graf selecteert, roept \texttt{ViewController} de centrale methode \texttt{navigateTo(grave:)} aan:
@@ -477,10 +497,46 @@ Wanneer de gebruiker een graf selecteert, roept \texttt{ViewController} de centr
             
             // Centreer minikaart op het geselecteerde graf
             minimapVC.centreMap(on: grave.coordinate, span: 0.0005)
+            
+            // Reset manuele dismiss zodat banner opnieuw kan verschijnen
+            bannerManuallDismissed = false
         }
     \end{minted}
     \caption[Centrale navigatiemethode]{Centrale navigatiemethode die alle componenten coördineert.}
 \end{listing}
+
+\subsection{Automatische fallback-banner}
+\label{sec:fallback}
+
+De fallback-banner is een oranje melding die automatisch verschijnt wanneer de AR-tracking gedurende meer dan 3 seconden instabiel is \textit{en} de gebruiker actief aan het navigeren is naar een geselecteerd graf. De banner biedt twee opties: de kaart onmiddellijk openen als alternatieve navigatiemodus, of de banner sluiten en de AR-navigatie verder zetten.
+
+\begin{listing}[H]
+    \begin{minted}{swift}
+        private func startFallbackTimer() {
+            guard !bannerManuallDismissed else { return }
+            trackingLimitedTimer?.invalidate()
+            trackingLimitedTimer = Timer.scheduledTimer(
+            withTimeInterval: 3.0, repeats: false) { [weak self] _ in
+                self?.showFallbackBanner()
+            }
+        }
+        
+        private func showFallbackBanner() {
+            guard fallbackBanner.alpha == 0 else { return }
+            fallbackBanner.isHidden = false
+            UIView.animate(withDuration: 0.35, delay: 0,
+            usingSpringWithDamping: 0.8,
+            initialSpringVelocity: 0.3) {
+                self.fallbackBanner.alpha = 1
+                self.fallbackBanner.transform = .identity
+            }
+            arManager.setSceneOpacity(0.4)
+        }
+    \end{minted}
+    \caption[Fallback banner logica]{Timer-gebaseerde activatie van de fallback-banner bij tracking-instabiliteit.}
+\end{listing}
+
+De vertraging van 3 seconden voorkomt dat de banner verschijnt bij korte, tijdelijke tracking-onderbrekingen (zoals het even wegdraaien van de camera). Wanneer de tracking herstelt naar \texttt{.normal}, wordt de banner automatisch verborgen, de timer geannuleerd en de opacity van de AR-nodes teruggezet naar 1.0. De banner verschijnt niet bij de \texttt{.initializing} en \texttt{.excessiveMotion} trackingstatussen, aangezien dit verwachte kortdurende toestanden zijn die geen actie van de gebruiker vereisen.
 
 \subsection{Minikaart (MinimapViewController)}
 
@@ -515,7 +571,7 @@ De minikaart is geïmplementeerd als een child view controller met een \texttt{M
     \caption[Minikaart fullscreen animatie]{Fullscreen-animatie van de minikaart via view-heroudering.}
 \end{listing}
 
-De animatie werkt door de view tijdelijk te herouderen naar de rootview. Dit is noodzakelijk omdat de Auto Layout-beperkingen van de schaduwcontainer de animatie anders zouden blokkeren, waardoor de widget enkel zou inzoomen in plaats van uit te vouwen.
+De animatie werkt door de view tijdelijk te herouderen naar de rootview. Dit is noodzakelijk omdat de Auto Layout-beperkingen van de schaduwcontainer de animatie anders zouden blokkeren, waardoor de widget enkel zou inzoomen in plaats van uit te vouwen. De minikaart fungeert ook als de primaire fallback-navigatiemodus wanneer AR-tracking instabiel is: de fallback-banner opent de minikaart rechtstreeks in volledigschermmodus.
 
 \subsection{Zoekscherm (SearchViewController)}
 
@@ -592,6 +648,7 @@ De implementatie verliep iteratief, overeenkomstig de methodologie. De voornaams
     \item \textbf{Iteratie 4 – 2D-pijloverlayer:} een platte UIKit-pijl (\texttt{ARDirectionOverlay}) gebaseerd op bearing-berekening. Hoewel functioneel, ontbrak het dieptegevoel van een echte AR-ervaring.
     \item \textbf{Iteratie 5 – 3D AR-pijl:} overgang naar een world-space \texttt{SCNNode} die per frame wordt bijgewerkt. Bevatte correctie van het coördinatenstelsel, de rotatiemathematica en de render thread-implementatie.
     \item \textbf{Iteratie 6 – Visuele verfijning:} hervorming van de pijlgeometrie, vergroting van de grafmarker-labels, en verwijdering van de ARKit feature point-debug-visualisatie.
+    \item \textbf{Iteratie 7 – Automatische fallback:} implementatie van de fallback-banner met timer-gebaseerde activatie, opacity-dimming van AR-nodes bij tracking-instabiliteit, en directe koppeling naar de volledigscherm-kaartmodus als alternatieve navigatiemodus.
 \end{itemize}
 
 Elke iteratie werd getest op een fysiek iOS-apparaat. ARKit is niet beschikbaar in de iOS-simulator, waardoor fysiek testen onvermijdelijk was voor alle AR-gerelateerde componenten. Problemen die tijdens het testen aan het licht kwamen, werden telkens gedocumenteerd en opgelost in de volgende iteratie. Voorbeelden hiervan zijn de onzichtbare pijl door een verkeerde opbouwvolgorde van \texttt{SCNNode}-kinderen, het latentieprobleem door \texttt{DispatchQueue.main.async} in de render loop, en de onjuiste standaardoriëntatie van \texttt{SCNPyramid} die een expliciete X-rotatie vereiste.
@@ -607,8 +664,84 @@ De huidige implementatie heeft een aantal technische beperkingen die relevant zi
     
     \item \textbf{AR world tracking drift:} ARKit's world tracking combineert visuele feature tracking met IMU-data. Bij langdurig gebruik of na onderbrekingen kan de tracking lichtjes driften. De implementatie vangt sessie-onderbrekingen op en herstart automatisch, maar dit impliceert een reset van de tracking en een nieuwe initialisatieperiode.
     
-    \item \textbf{Belichting en weersomstandigheden:} heldere zonneschijn of bewolking kunnen de tracking-stabiliteit beïnvloeden. De applicatie toont een statuslabel dat de trackingkwaliteit communiceert (\textit{Initialising}, \textit{Insufficient Features}, \textit{AR Active}), maar voorziet nog geen automatische fallback naar een vereenvoudigde modus, wat geïdentificeerd werd als risico in de risicoanalyse.
+    \item \textbf{Belichting en weersomstandigheden:} heldere zonneschijn of bewolking kunnen de tracking-stabiliteit beïnvloeden. De applicatie communiceert de trackingkwaliteit via een statuslabel en activeert bij aanhoudende instabiliteit automatisch de fallback-banner, die de gebruiker naar de kaartweergave leidt (zie sectie~\ref{sec:fallback}). Een volledig automatische omschakeling zonder gebruikersbevestiging werd bewust niet geïmplementeerd, om de gebruiker de controle te laten over de navigatiemodus.
+    
+    \item \textbf{Ontbrekende routelijn:} het ontwerp voorzag een virtuele routelijn die de optimale looproute op de kaart aangeeft, vergelijkbaar met het geoloket van de gemeente Beveren. Deze functionaliteit werd niet geïmplementeerd omdat ze een nauwkeurige digitale plattegrond van de looppaden op het kerkhof van Sint-Gillis-Waas vereist. Dergelijke GIS-paddata was niet beschikbaar; de redenen hiervoor worden uitgebreid besproken in sectie~\ref{sec:routelijn}.
 \end{itemize}
+
+\section{Niet-geïmplementeerde feature: routelijn op de kaart}
+\label{sec:routelijn}
+
+Een van de features die in de ontwerpfase werd voorzien, is een routelijn op de minikaart die de optimale looproute van de gebruiker naar het geselecteerde graf aangeeft. Het geoloket van de gemeente Beveren toont een dergelijke lijn als een oranje gestippelde lijn die de bezoeker langs de bestaande paden leidt. Deze feature werd bewust niet geïmplementeerd in deze proof of concept, om de volgende redenen.
+
+\subsection{Twee soorten routelijnen}
+
+Er bestaat een fundamenteel onderscheid tussen twee soorten routelijnen die visueel op elkaar lijken maar technisch volledig anders zijn:
+
+\begin{enumerate}
+    \item \textbf{Rechte lijn (crow flies):} een directe verbindingslijn tussen de gebruiker en het graf, ongeacht obstakels of paden. Dit vereist enkel de twee GPS-coördinaten en is technisch triviaal te implementeren als een \texttt{MKPolyline} op de \texttt{MKMapView}. Deze lijn is echter misleidend: ze suggereert een looproute die dwars door andere grafstenen, bomen en afgesloten zones loopt.
+    
+    \item \textbf{Geroute lijn (zoals Beveren):} een lijn die de werkelijke looppaden van het kerkhof volgt. Dit vereist een gedetailleerde digitale plattegrond van de beloopbare paden als GIS-data (gewoonlijk in GeoJSON- of Shapefile-formaat), en een routeringsalgoritme dat de kortste weg over dit padennetwerk berekent.
+\end{enumerate}
+
+Enkel de tweede variant is zinvol voor een begraafplaatsapplicatie. Een rechte lijn zou de indruk wekken dat de gebruiker de kortste weg volgt, terwijl die in werkelijkheid onbegaanbaar is.
+
+\subsection{Ontbrekende GIS-paddata voor Sint-Gillis-Waas}
+
+De geroute lijn vereist GIS-paddata van het kerkhof van Sint-Gillis-Waas. Uit het interview met de gemeente Sint-Gillis-Waas bleek dat de bestaande digitale data van het kerkhof beheerd wordt via WebBGP, het interne systeem van Cevi. WebBGP bevat graflocaties en concessiedata, maar het is niet zeker of het systeem ook gedetailleerde paddata van het terrein bevat in een formaat dat extern beschikbaar gesteld kan worden.
+
+Zelfs indien dergelijke paddata beschikbaar zou zijn, zou de gemeente deze gezien de juridische en administratieve vereisten die in hoofdstuk~\ref{ch:juridische-analyse} beschreven worden niet zomaar als open data kunnen vrijgeven aan een externe applicatieontwikkelaar. Een formele samenwerkingsovereenkomst en mogelijk een verwerkersovereenkomst zouden vereist zijn.
+
+\subsection{Implicaties voor een productieomgeving}
+
+Voor een productieomgeving die meerdere begraafplaatsen ondersteunt, bijvoorbeeld
+verspreid over verschillende Belgische gemeenten of zelfs internationaal, zou het
+onpraktisch en onhaalbaar zijn om voor elke begraafplaats afzonderlijk een
+samenwerkingsovereenkomst te sluiten met de betrokken gemeente om paddata te
+verkrijgen. Dit roept de vraag op of er een schaalbare, gemeente-onafhankelijke
+oplossing bestaat.
+
+\textbf{OpenStreetMap als schaalbare databron}
+
+OpenStreetMap (OSM) is een vrij toegankelijke, wereldwijde geografische database
+die door vrijwilligers wordt opgebouwd en onderhouden onder een open licentie
+(ODbL). OSM ondersteunt specifieke tags voor begraafplaatsen (\texttt{landuse=cemetery})
+en de looppaden daarbinnen (\texttt{highway=footway}, \texttt{highway=path}).
+Wanneer een begraafplaats voldoende gedetailleerd in kaart is gebracht in OSM,
+kunnen de looppaden worden opgevraagd via de Overpass API zonder enige overeenkomst
+met een gemeente. Onderzoek bevestigt dat OSM-data voldoende kwaliteit biedt voor
+voetgangersroutering op wereldschaal \autocite{Novack2018}.
+
+Dit maakt OSM de meest realistische schaalbare oplossing voor een productieversie
+van de applicatie. De routeringslogica, het berekenen van de kortste looproute
+over het padennetwerk, kan worden gerealiseerd via bestaande open-source
+bibliotheken zoals GraphHopper of OSRM, die beide OSM-data als invoer
+ondersteunen.
+
+De praktische beperking blijft echter de \textit{volledigheid} van OSM-data per
+begraafplaats. Grote en bekende begraafplaatsen zijn doorgaans goed gedocumenteerd,
+maar kleinere gemeentelijke begraafplaatsen zoals die van Sint-Gillis-Waas zijn
+in OSM op het moment van schrijven onvoldoende gedetailleerd om betrouwbare
+routing te ondersteunen. Dit is geen structureel probleem van de oplossing, maar
+een kwestie van databeschikbaarheid die zich in de loop van de tijd verbetert
+naarmate de OSM-gemeenschap groeit.
+
+\textbf{Samenvatting van de aanbevolen aanpak voor productie}
+
+\begin{enumerate}
+    \item Controleer of de begraafplaats beschikbaar is in OSM met voldoende
+    paddetail via de Overpass API.
+    \item Indien ja: gebruik OSM-paddata + een open-source routeringsbibliotheek.
+    Geen overeenkomst met de gemeente vereist.
+    \item Indien nee: werk samen met de gemeente of nodig de lokale OSM-gemeenschap
+    uit om de begraafplaats in kaart te brengen. Dit is een eenmalige inspanning
+    die de data permanent en vrij beschikbaar maakt voor iedereen.
+\end{enumerate}
+
+Deze aanpak bewijst dat de routelijn-feature in een productieomgeving realiseerbaar
+is zonder afhankelijk te zijn van individuele gemeentelijke datadelingen, en dat
+de ontbrekende GIS-paddata voor Sint-Gillis-Waas een tijdelijke, oplosbare
+beperking is en geen fundamenteel obstakel voor het concept.
 
 \section{Platformonafhankelijkheid en overdraagbaarheid}
 \label{sec:platform}
@@ -624,16 +757,16 @@ Op Android-toestellen wordt AR-tracking verzorgd door \textbf{ARCore}, Google's 
 \begin{itemize}
     \item \textbf{Motion tracking:} ARCore bepaalt continu de positie en oriëntatie van het toestel in de ruimte via een combinatie van camerabeelden en IMU-sensordata (versnellingsmeter en gyroscoop) \autocite{GoogleARCore2024}.
     \item \textbf{Environmental understanding:} ARCore detecteert horizontale en verticale vlakken in de omgeving, vergelijkbaar met ARKit's plane detection.
-    \item \textbf{Geospatial API:} ARCore biedt via de Geospatial API GPS-gebaseerde werelduitlijning, waardoor virtuele objecten op basis van GPS-coördinaten in de echte wereld geplaatst kunnen worden. Dit is exact de functionaliteit die in deze proof of concept gebruikt wordt voor de grafmarker en de navigatiepijl \autocite{Google2023}.
+    \item \textbf{Geospatial API:} ARCore biedt via de Geospatial API GPS-gebaseerde werelduitlijning, waardoor virtuele objecten op basis van GPS-coördinaten in de echte wereld geplaatst kunnen worden. Dit is exact de functionaliteit die in dit proof of concept gebruikt wordt voor de grafmarker en de navigatiepijl \autocite{Google2023}.
 \end{itemize}
 
-De werelduitlijning die in deze proof of concept gebruikt wordt via \texttt{ARWorldTrackingConfiguration.worldAlignment = .gravityAndHeading} (ARKit) heeft een directe Android-tegenhanger: ARCore's \texttt{GeospatialPose} API combineert GPS, kompas en visuele tracking om een uitgelijnde wereldruimte te creëren die overeenkomt met geografische coördinaten. De vlakke-Aarde-conversie van GPS naar lokale AR-coördinaten, beschreven in sectie~\ref{sec:gpsconversie}, is platformonafhankelijke wiskunde die identiek toepasbaar is in een Android-implementatie.
+De werelduitlijning die in dit proof of concept gebruikt wordt via \texttt{ARWorldTrackingConfiguration.worldAlignment = .gravityAndHeading} (ARKit) heeft een directe Android-tegenhanger: ARCore's \texttt{GeospatialPose} API combineert GPS, kompas en visuele tracking om een uitgelijnde wereldruimte te creëren die overeenkomt met geografische coördinaten. De vlakke-Aarde-conversie van GPS naar lokale AR-coördinaten, beschreven in sectie~\ref{sec:gpsconversie}, is platformonafhankelijke wiskunde die identiek toepasbaar is in een Android-implementatie.
 
 ARCore is beschikbaar op meer dan 1 miljard Android-toestellen die Android 7.0 of hoger draaien \autocite{GoogleARCore2024}. Dit betekent dat het overgrote deel van de actieve Android-smartphones in staat is om dezelfde AR-navigatiefunctionaliteit uit te voeren als het iOS proof of concept.
 
 \subsection{Cross-platform ontwikkeling via Unity AR Foundation}
 
-Een productieversie van de applicatie hoeft niet in twee afzonderlijke codebases te worden ontwikkeld. \textbf{Unity AR Foundation} is een cross-platform framework dat een geunificeerde API biedt voor zowel ARKit (iOS) als ARCore (Android) \autocite{Technologies2024}. De ontwikkelaar schrijft de AR-logica één keer in C\# -> AR Foundation vertaalt deze automatisch naar de native ARKit- of ARCore-aanroepen afhankelijk van het doelplatform.
+Een productieversie van de applicatie hoeft niet in twee afzonderlijke codebases te worden ontwikkeld. \textbf{Unity AR Foundation} is een cross-platform framework dat een geunificeerde API biedt voor zowel ARKit (iOS) als ARCore (Android) \autocite{Technologies2024}. De ontwikkelaar schrijft de AR-logica één keer in C\#; AR Foundation vertaalt deze automatisch naar de native ARKit- of ARCore-aanroepen afhankelijk van het doelplatform.
 
 Tabel~\ref{tab:platform-vergelijking} geeft een overzicht van hoe de technische componenten van dit proof of concept zich verhouden tussen de iOS-implementatie en een equivalente Android- of cross-platform implementatie.
 
@@ -690,6 +823,6 @@ De implementatie sluit nauw aan bij de doelstellingen uit de methodologie. De tw
     \item \textbf{AR-registratienauwkeurigheid \autocite{Xu2018}:} de vlakke-Aarde-benadering levert een fout van minder dan 0,01\% binnen 500 meter, wat volstaat voor kerkhofschaal.
     
     \item \textbf{Gebruiksvriendelijkheid voor diverse doelgroepen \autocite{Haekkilae2022}:} de interface is bewust eenvoudig gehouden. Één zoekknop, één kaartwidget en een automatisch verschijnende informatiekaart zijn voldoende voor het basisgebruik, zonder vereiste technische kennis.
+    
+    \item \textbf{Fallback bij tracking-instabiliteit:} zoals geïdentificeerd als risico in de risicoanalyse (hoofdstuk~\ref{ch:voorbereiding-analyse}), werd een automatisch fallback-mechanisme geïmplementeerd. Bij aanhoudende AR-instabiliteit wordt de gebruiker actief naar de kaartweergave geleid, zodat de navigatie altijd kan worden voortgezet ongeacht de AR-trackingkwaliteit.
 \end{itemize}
-
-Componenten die in de methodologie beschreven zijn maar nog niet geïmplementeerd werden, omvatten de automatische fallback bij AR-instabiliteit en een spraakinterface. Deze worden beschouwd als aanbevelingen voor verdere doorontwikkeling en worden besproken in het evaluatiehoofdstuk.

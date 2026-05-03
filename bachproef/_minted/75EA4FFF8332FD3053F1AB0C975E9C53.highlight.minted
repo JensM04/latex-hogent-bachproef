@@ -15,5 +15,8 @@
 
 \PYG{+w}{    }\PYG{c+c1}{// Centreer minikaart op het geselecteerde graf}
 \PYG{+w}{    }\PYG{n}{minimapVC}\PYG{p}{.}\PYG{n}{centreMap}\PYG{p}{(}\PYG{n}{on}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{grave}\PYG{p}{.}\PYG{n}{coordinate}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{span}\PYG{p}{:}\PYG{+w}{ }\PYG{l+m+mf}{0.0005}\PYG{p}{)}
+
+\PYG{+w}{    }\PYG{c+c1}{// Reset manuele dismiss zodat banner opnieuw kan verschijnen}
+\PYG{+w}{    }\PYG{n}{bannerManuallDismissed}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{k+kc}{false}
 \PYG{p}{\PYGZcb{}}
 \end{MintedVerbatim}

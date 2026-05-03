@@ -1,0 +1,9 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{func}\PYG{+w}{ }\PYG{n+nf}{setSceneOpacity}\PYG{p}{(}\PYG{k+kc}{\PYGZus{}}\PYG{+w}{ }\PYG{n}{opacity}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{CGFloat}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nb+bp}{SCNTransaction}\PYG{p}{.}\PYG{n}{begin}\PYG{p}{()}
+\PYG{+w}{    }\PYG{n+nb+bp}{SCNTransaction}\PYG{p}{.}\PYG{n}{animationDuration}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{0.4}
+\PYG{+w}{    }\PYG{n}{arrowNode}\PYG{p}{?.}\PYG{n}{opacity}\PYG{+w}{       }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{opacity}
+\PYG{+w}{    }\PYG{n}{graveMarkerNode}\PYG{p}{?.}\PYG{n}{opacity}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{opacity}
+\PYG{+w}{    }\PYG{n+nb+bp}{SCNTransaction}\PYG{p}{.}\PYG{n}{commit}\PYG{p}{()}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}
