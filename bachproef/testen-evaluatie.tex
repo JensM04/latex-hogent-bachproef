@@ -1,15 +1,18 @@
+%%=============================================================================
+%% Fase 5: Testen
+%%=============================================================================
+
 \chapter{\IfLanguageName{dutch}{Testen}{Testing}}%
 \label{ch:testen}
-
-% TODO nieuwe testpersonen
-//TODO -> dit hoofdstuk wordt nog aangepast na het testen met andere personen. nu heb enkel ikzelf de applicatie getest
 
 Dit hoofdstuk beschrijft de uitvoering van de testfase op het gemeentelijk
 kerkhof van Sint-Gillis-Waas. De testopzet zoals gedefinieerd in de methodologie
 werd gevolgd, met een technische evaluatie van alle kernfunctionaliteiten van de
 applicatie en een observationele meting van de navigatietijd en gebruiksgemak.
 
+%%─────────────────────────────────────────────────────────────────────────────
 \section{Testopzet}
+%%─────────────────────────────────────────────────────────────────────────────
 
 De tests werden uitgevoerd op het gemeentelijk kerkhof van Sint-Gillis-Waas,
 de testlocatie die werd geanalyseerd in hoofdstuk~\ref{ch:voorbereiding-analyse}.
@@ -20,15 +23,15 @@ De omstandigheden tijdens de test waren als volgt:
     \item \textbf{Tijdstip:} overdag
     \item \textbf{Toestel:} iPhone met iOS, ARKit-compatibel
     \item \textbf{Testpersonen:} % TODO: aantal testpersonen invullen na uitvoering
-    // TODO: aantal testpersonen invullen na uitvoering
 \end{itemize}
 
 Zoals beschreven in de methodologie werden drie testscenario's gedefinieerd.
 In deze testronde werd \textbf{Scenario C} (kaartweergave met AR) volledig
 doorlopen. % TODO: scenario A en B toevoegen indien uitgevoerd met extra testpersonen.
-// TODO: scenario A en B toevoegen 
 
+%%─────────────────────────────────────────────────────────────────────────────
 \section{Scenario C: Kaartweergave met AR}
+%%─────────────────────────────────────────────────────────────────────────────
 
 \subsection{Verloop van de test}
 
@@ -40,9 +43,8 @@ De testpersoon volgde de aanwijzingen van de applicatie tot het geselecteerde
 graf werd bereikt.
 
 De totale navigatietijd van de ingang tot aan het graf bedroeg
-\textbf{ongeveer 6 minuten}.
+\textbf{approximately 5 minuten}.
 % TODO: navigatietijden van extra testpersonen toevoegen
-//todo tijden van de andere personen toevoegen
 
 \subsection{AR-navigatiepijl}
 
@@ -68,7 +70,8 @@ circa \textbf{20 meter} van de geselecteerde grafpositie bevond. Op die afstand
 was de verticale lichtbalk duidelijk zichtbaar boven de omgeving, wat het
 beoogde doel van de marker als visueel baken bevestigt.
 
-Wat betreft de positioneringsnauwkeurigheid: de marker landde dichtbij de correcte grafsteen. Een exacte plaatsing is echter inherent beperkt
+Wat betreft de positioneringsnauwkeurigheid: de marker landde in de nabijheid
+van de correcte grafsteen. Een exacte plaatsing is echter inherent beperkt
 door de aard van de mockdata: de coördinaten werden handmatig ingevoerd op
 basis van Google Maps en zijn benaderingen van de werkelijke grafposities.
 Voor productiewaardige nauwkeurigheid zijn officieel ingemeten coördinaten
@@ -99,7 +102,9 @@ minikaart toonde de gebruikerspositie en het geselecteerde graf correct. De
 volledigschermanimatie van de minikaart werkte vloeiend. Het afstandslabel
 toonde een nauwkeurige benadering van de afstand en werkte continu bij.
 
+%%─────────────────────────────────────────────────────────────────────────────
 \section{Samenvatting van de testresultaten}
+%%─────────────────────────────────────────────────────────────────────────────
 
 Tabel~\ref{tab:testresultaten} geeft een overzicht van de meetindicatoren en
 de bijhorende resultaten.
@@ -114,7 +119,7 @@ de bijhorende resultaten.
         \hline
         \textbf{Indicator} & \textbf{Resultaat} \\
         \hline
-        Navigatietijd & $\pm$ 6 minuten van ingang tot graf \\
+        Navigatietijd & $\pm$ 5 minuten van ingang tot graf \\
         \hline
         Pijlrichting correct & Ja, continu correct gedurende de volledige test \\
         \hline
@@ -136,7 +141,5 @@ de bijhorende resultaten.
         \hline
     \end{tabular}
 \end{table}
-
-//TODO tabel uitbreiden met resultaten van nieuwe testpersonen
 
 % TODO: tabel uitbreiden met resultaten van extra testpersonen

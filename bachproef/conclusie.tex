@@ -1,17 +1,88 @@
-%%=============================================================================
-%% Conclusie
-%%=============================================================================
-
-\chapter{Conclusie}%
+\chapter{\IfLanguageName{dutch}{Conclusie}{Conclusion}}%
 \label{ch:conclusie}
 
-% TODO: Trek een duidelijke conclusie, in de vorm van een antwoord op de
-% onderzoeksvra(a)g(en). Wat was jouw bijdrage aan het onderzoeksdomein en
-% hoe biedt dit meerwaarde aan het vakgebied/doelgroep? 
-% Reflecteer kritisch over het resultaat. In Engelse teksten wordt deze sectie
-% ``Discussion'' genoemd. Had je deze uitkomst verwacht? Zijn er zaken die nog
-% niet duidelijk zijn?
-% Heeft het onderzoek geleid tot nieuwe vragen die uitnodigen tot verder 
-%onderzoek?
+Dit onderzoek vertrok vanuit een concrete en maatschappelijk relevante
+probleemstelling: bezoekers van begraafplaatsen ervaren moeilijkheden bij het
+terugvinden van een specifiek graf, terwijl bestaande digitale oplossingen nog
+te veel vragen dat de gebruiker zijn aandacht afwisselt tussen scherm en omgeving.
+De centrale onderzoeksvraag luidde: \textit{Op welke manier kan digitalisatie,
+    in combinatie met Augmented Reality, worden ingezet om de efficiëntie van het
+    navigeren op een kerkhof te verbeteren?}
 
+\section{Antwoord op de centrale onderzoeksvraag}
 
+Op basis van dit onderzoek kan worden besloten dat augmented reality een
+technisch haalbare en functionele oplossing biedt voor kerkhofnavigatie. De
+ontwikkelde proof of concept toont aan dat een 3D AR-navigatiepijl in combinatie
+met een world-locked grafmarker de gebruiker correct en intuïtief naar een
+geselecteerd graf kan leiden, zonder dat de gebruiker zijn blik op de omgeving
+moet veranderen. De technische evaluatie bevestigde dat alle kerncomponenten correct
+functioneren: de pijl wees gedurende de volledige test in de juiste richting,
+de grafmarker werd zichtbaar op circa 20 meter, de ARKit world tracking was
+stabiel vanaf de eerste seconde, en de zoekfunctie, minikaart en afstandslabel
+functioneerden allen correct.
+
+Tegelijkertijd maakt dit onderzoek duidelijk dat AR geen op zichzelf staande
+oplossing is. De combinatie met een digitale kaartweergave is essentieel: de
+minikaart biedt de ruimtelijke context die pure AR mist, en fungeert als
+betrouwbare fallback wanneer AR-tracking tijdelijk instabiel is. Dit hybride
+model, waarbij AR en kaart elkaar aanvullen in plaats van vervangen, is de
+sterkste bevinding van dit onderzoek.
+
+\section{Technische bevindingen}
+
+\begin{itemize}
+    \item \textbf{ARKit .gravityAndHeading} maakt directe GPS-naar-AR conversie
+    mogelijk via een vlakke-Aarde-benadering met een fout van minder dan 0,01\%
+    binnen 500 meter, wat zeker volstaat voor kerkhofschaal.
+    
+    \item \textbf{GPS-nauwkeurigheid} blijft de voornaamste beperking.
+    Op een begraafplaats met grafstenen die slechts 60 tot 80 centimeter uit
+    elkaar staan, is een GPS-nauwkeurigheid van 3 tot 10 meter onvoldoende voor
+    exacte grafsteen-identificatie. Duidelijke visuele markers en officieel
+    ingemeten coördinaten zijn noodzakelijk om dit te compenseren.
+    
+    \item \textbf{Padsgewijze navigatie} ontbreekt. De huidige pijlnavigatie
+    wijst steeds in een rechte lijn naar het graf. Voor een optimale
+    gebruikerservaring is een routelijn langs de bestaande paden gewenst,
+    waarvoor GIS-paddata vereist is. OpenStreetMap biedt hiervoor een
+    schaalbare oplossing \autocite{Novack2018}.
+    
+    \item \textbf{Platformonafhankelijkheid} is aangetoond: alle technische
+    componenten hebben een directe equivalent op Android via ARCore en Google's
+    Geospatial API. Een cross-platform implementatie via Unity AR Foundation
+    is technisch haalbaar \autocite{GoogleARCore2024}.
+\end{itemize}
+
+\section{Juridische bevindingen}
+
+\begin{itemize}
+    \item Grafdata van overledenen valt buiten de bescherming van de GDPR,
+    maar vereist zorgvuldig gebruik vanwege de mogelijke indirecte link met
+    levende familieleden.
+    \item Het rijksregisternummer mag onder geen enkele reden worden verwerkt in een
+    publieke navigatieapplicatie op basis van de Wet van 8 augustus 1983
+    \autocite{WetRijksregister1983}.
+    \item Voor een productieomgeving zijn een verwerkersovereenkomst met de
+    gemeente, een privacyverklaring en mogelijk een DPIA vereiste stappen.
+\end{itemize}
+
+\section{Beperkingen van dit onderzoek}
+
+//todo
+%todo aanvullen
+
+\section{Maatschappelijke relevantie}
+
+Dit onderzoek toont aan dat technologie, ook in een emotioneel gevoelige context
+zoals een begraafplaats, een zinvolle bijdrage kan leveren aan de gebruikerservaring.
+Augmented reality is hierbij geen doel op zich, maar een middel om een concreet
+probleem op te lossen: het gemakkelijker en minder stressvol maken van het
+terugvinden van een graf. De keuze voor een discreet, snel en intuïtief ontwerp
+weerspiegelt het idee dat technologie in deze context de achtergrond moet
+blijven, en de mens op de voorgrond.
+
+Indien deze proof of concept verder wordt ontwikkeld en geïmplementeerd door de
+gemeente Sint-Gillis-Waas of een vergelijkbare gemeente, betekent het een
+concrete verbetering voor elke bezoeker die op zoek is naar een dierbare. Dat
+is uiteindelijk de kern van dit onderzoek.

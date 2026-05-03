@@ -1,38 +1,3 @@
-%%=============================================================================
-%% Samenvatting
-%%=============================================================================
-
-% TODO: De "abstract" of samenvatting is een kernachtige (~ 1 blz. voor een
-% thesis) synthese van het document.
-%
-% Een goede abstract biedt een kernachtig antwoord op volgende vragen:
-%
-% 1. Waarover gaat de bachelorproef?
-% 2. Waarom heb je er over geschreven?
-% 3. Hoe heb je het onderzoek uitgevoerd?
-% 4. Wat waren de resultaten? Wat blijkt uit je onderzoek?
-% 5. Wat betekenen je resultaten? Wat is de relevantie voor het werkveld?
-%
-% Daarom bestaat een abstract uit volgende componenten:
-%
-% - inleiding + kaderen thema
-% - probleemstelling
-% - (centrale) onderzoeksvraag
-% - onderzoeksdoelstelling
-% - methodologie
-% - resultaten (beperk tot de belangrijkste, relevant voor de onderzoeksvraag)
-% - conclusies, aanbevelingen, beperkingen
-%
-% LET OP! Een samenvatting is GEEN voorwoord!
-
-%%---------- Nederlandse samenvatting -----------------------------------------
-%
-% TODO: Als je je bachelorproef in het Engels schrijft, moet je eerst een
-% Nederlandse samenvatting invoegen. Haal daarvoor onderstaande code uit
-% commentaar.
-% Wie zijn bachelorproef in het Nederlands schrijft, kan dit negeren, de inhoud
-% wordt niet in het document ingevoegd.
-
 \IfLanguageName{english}{%
 \selectlanguage{dutch}
 \chapter*{Samenvatting}
@@ -40,8 +5,38 @@
 \selectlanguage{english}
 }{}
 
-%%---------- Samenvatting -----------------------------------------------------
-% De samenvatting in de hoofdtaal van het document
-
 \chapter*{\IfLanguageName{dutch}{Samenvatting}{Abstract}}
+
+
+%  TODO na testfase: resultaten en conclusie aanvullen.
+
+Bezoekers van begraafplaatsen ervaren regelmatig moeilijkheden bij het
+terugvinden van een specifiek graf, wat een stressvolle ervaring kan zijn in een
+emotioneel gevoelige context. Bestaande digitale oplossingen zoals gemeentelijke
+geoloketten bieden wel kaartnavigatie, maar vereisen dat de gebruiker zijn
+aandacht afwisselt tussen scherm en omgeving. Deze bachelorproef onderzoekt of
+augmented reality (AR) een efficiënter en intuïtiever alternatief kan bieden.
+
+De centrale onderzoeksvraag luidt: \textit{Op welke manier kan digitalisatie,
+    in combinatie met Augmented Reality, worden ingezet om de efficiëntie van het
+    navigeren op een kerkhof te verbeteren?} Als antwoord werd een proof of concept
+ontwikkeld: een native iOS-applicatie die een 3D AR-navigatiepijl en een
+world-locked grafmarker combineert met een interactieve satellietminikaart.
+De applicatie werd gebouwd met ARKit, SceneKit en CoreLocation, en geëvalueerd
+op het kerkhof van Sint-Gillis-Waas.
+
+Naast de technische implementatie werd ook een juridische analyse uitgevoerd.
+Deze toont aan dat grafdata juridisch veilig verwerkt kan worden voor
+navigatiedoeleinden, mits het rijksregisternummer categorisch wordt uitgesloten.
+Voor een productieomgeving zijn een verwerkersovereenkomst met de gemeente en
+een DPIA aanbevolen.
+
+% TODO: aanvullen na testing
+
+//todo resultaten testfase en conclusie
+%De technische evaluatie toonde aan dat [RESULTATEN INVULLEN].
+%De conclusie is dat AR-navigatie op begraafplaatsen technisch haalbaar is en
+%[CONCLUSIE INVULLEN]. Aanbevelingen voor verdere ontwikkeling omvatten de
+%integratie van OSM-paddata voor een geroute navigatielijn en een formele
+%gebruikersstudie met testpersonen van diverse leeftijdsgroepen.
 

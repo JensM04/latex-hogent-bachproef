@@ -1,0 +1,178 @@
+\chapter{\IfLanguageName{dutch}{Analyse en evaluatie}{Analysis and evaluation}}%
+\label{ch:analyse-evaluatie}
+
+Dit hoofdstuk analyseert de resultaten van de testfase en beantwoordt de
+onderzoeksvragen zoals geformuleerd in de inleiding. De bevindingen worden
+getoetst aan de literatuur en de doelstellingen van de proof of concept.
+Aansluitend worden de beperkingen van het onderzoek geïdentificeerd en
+aanbevelingen geformuleerd voor verdere doorontwikkeling.
+
+\section{Beantwoording van de onderzoeksvragen}
+
+\subsection{Welke moeilijkheden ervaren bezoekers bij het navigeren op kerkhoven?}
+
+De literatuurstudie bevestigt dat bezoekers regelmatig moeilijkheden ervaren bij
+het terugvinden van een specifiek graf, vooral op grote of uniform ingedeelde
+begraafplaatsen \autocite{Haekkilae2022}. Het kerkhof van Sint-Gillis-Waas, met
+zijn reguliere rasterindeling van identieke rijen en kolommen, illustreert dit
+concreet: zonder digitale ondersteuning is het moeilijk om de juiste rij te
+identificeren. De terreinanalyse bevestigde dat alle rijen visueel sterk op
+elkaar lijken, wat een directe aanleiding was voor het ontwerp van de
+verticale AR-grafmarker.
+
+\subsection{Welke beperkingen hebben bestaande navigatietoepassingen?}
+
+Bestaande oplossingen zoals het geoloket van de gemeente Beveren bieden
+kaartnavigatie maar vereisen dat de gebruiker zijn blik afwisselt tussen het
+scherm en de fysieke omgeving. Dit verhoogt de cognitieve belasting en past
+minder goed bij de emotionele context van een begraafplaatsbezoek
+\autocite{Zhao2025}. Het interne systeem WebBGP van Sint-Gillis-Waas is
+bovendien uitsluitend beschikbaar voor gemeentepersoneel en biedt geen
+directe ondersteuning aan bezoekers.
+
+\subsection{Welke behoeften hebben bezoekers van verschillende leeftijden?}
+
+De interface werd ontworpen volgens de principes van minimale interactie en
+toegankelijkheid. Eén zoekknop, een automatisch verschijnende informatiekaart
+en een cameraweergave die onmiddellijk beschikbaar is, verlagen de drempel
+voor gebruik door minder technologisch vaardige bezoekers \autocite{Haekkilae2022}.
+De testfase bevestigde dat de basisnavigatie intuïtief verloopt.
+
+//TODO aanvullen met behoeften van andere testpersonen
+
+% TODO: aanvullen met observaties van extra testpersonen
+
+\subsection{Welke emotionele en contextuele factoren spelen een rol?}
+
+Een begraafplaats vraagt om discretie en respect. De applicatie werd ontworpen
+zonder geluid, zonder opvallende visuele effecten buiten het scherm en met een
+interface die snel en efficiënt te bedienen is. De AR-overlay is uitsluitend
+zichtbaar op het scherm van de gebruiker en heeft geen impact op de beleving
+van andere bezoekers. Dit sluit aan bij de ethische overwegingen beschreven
+in hoofdstuk~\ref{ch:juridische-analyse}.
+
+\subsection{Welke privacygevoelige data is hierbij betrokken?}
+
+De juridische analyse toonde aan dat namen, geboorte- en overlijdensdata van
+overledenen buiten de beschermingssfeer van de GDPR vallen, maar dat zorgvuldig
+gebruik vereist is. De locatiegegevens van de gebruiker zijn wel persoonsgegevens
+en mogen niet worden opgeslagen. Het rijksregisternummer is categorisch
+uitgesloten op basis van de Wet van 8 augustus 1983 \autocite{WetRijksregister1983}.
+
+\subsection{Hoe kan Augmented Reality ondersteuning bieden bij kerkhofnavigatie?}
+
+De testresultaten bevestigen dat AR een functionele en intuïtieve
+navigatieondersteuning biedt. De 3D-navigatiepijl wees gedurende de volledige
+test correct in de richting van het geselecteerde graf en roteerde vloeiend
+mee bij elke richtingsverandering. De grafmarker werd zichtbaar op circa
+20 meter. AR biedt hierbij een voordeel ten opzichte van klassieke kaartnavigatie:
+de gebruiker hoeft zijn blik niet weg te wenden van de omgeving \autocite{Zhao2025}.
+
+\subsection{Hoe kan AR gecombineerd worden met digitale kaarten of geoloketten?}
+
+De applicatie combineert beide benaderingen: de AR-cameraweergave voor directe
+ruimtelijke navigatie en de satellietminikaart voor contextueel overzicht. De
+minikaart toonde de gebruikerspositie en het geselecteerde graf correct en kon
+worden uitgevouwen naar volledigscherm als alternatieve navigatiemodus. De
+fallback-banner koppelt beide modi automatisch bij tracking-instabiliteit. In
+een productieomgeving kan de kaartcomponent worden uitgebreid met een geroute
+navigatielijn op basis van OSM-paddata, zoals beschreven in
+sectie~\ref{sec:routelijn}.
+
+\subsection{Welke ontwerprichtlijnen zijn nodig om rust en sereniteit te bewaren?}
+
+Op basis van de implementatie en de ethische analyse werden de volgende
+ontwerprichtlijnen gehanteerd: geen geluidseffecten, een interface die snel
+en discreet te bedienen is, AR-elementen die uitsluitend zichtbaar zijn op
+het eigen scherm, en een eenvoudige gebruikersstroom zonder onnodige stappen.
+Dit sluit aan bij de bevindingen van \autocite{Haekkilae2022} over de nood
+aan respectvolle digitale oplossingen in emotioneel gevoelige contexten.
+
+\subsection{Welke data kan veilig gebruikt worden?}
+
+Naam, geboorte- en overlijdensdatum, GPS-locatie van het graf en
+sectie/rij/plotnummer kunnen veilig worden verwerkt voor navigatiedoeleinden.
+Het rijksregisternummer is absoluut uitgesloten. Biografieën en foto's vereisen
+expliciete toestemming van nabestaanden. De GPS-locatie van de gebruiker mag
+niet worden opgeslagen. Tabel~\ref{tab:datatypes} in
+hoofdstuk~\ref{ch:juridische-analyse} geeft een volledig overzicht.
+
+\subsection{Hoe kan deze proof of concept getest en geëvalueerd worden?}
+
+De technische evaluatie toonde aan dat een combinatie van functionele controles
+(pijlrichting, markerplaatsing, tracking, zoekfunctie) en observationele meting
+(navigatietijd, gebruiksgemak) een adequate evaluatiemethode vormt voor deze proof of concept. Voor een volwaardige gebruikersevaluatie zijn de drie
+vergelijkende scenario's uit de methodologie vereist, uitgevoerd met testpersonen
+van diverse achtergronden.
+
+
+// todo aanvullen met resultaten andere personen
+% TODO: aanvullen na uitvoering met extra testpersonen
+
+\section{Evaluatie van het proof of concept}
+
+\subsection{Wat werkt goed}
+
+De technische evaluatie toont aan dat de kernfunctionaliteit correct werkt.
+De AR-navigatiepijl is betrouwbaar, responsief en altijd zichtbaar. De grafmarker
+is zichtbaar van op een afstand die praktisch bruikbaar is op kerkhofschaal.
+De zoekfunctie, minikaart en afstandslabel functioneren allen correct. De
+applicatie opent onmiddellijk op de cameraweergave zonder laadtijd of onboarding.
+Het fallback-mechanisme werkte correct bij gesimuleerde tracking-degradatie.
+
+\subsection{Wat kan beter}
+
+De voornaamste tekortkoming is de navigatiestijl van de pijl. De pijl wijst
+steeds in een rechte lijn naar het geselecteerde graf, ongeacht de aanwezige
+paden. In de praktijk is het voor een gebruiker niet altijd duidelijk welk pad
+hij moet volgen. Een padsgewijze navigatie met expliciete instructies zou de
+gebruikerservaring aanzienlijk verbeteren, maar vereist GIS-paddata die
+momenteel niet beschikbaar is.
+
+Daarnaast is de nauwkeurigheid van de grafmarkerplaatsing beperkt door de
+kwaliteit van de mockdata. In een productieomgeving met officieel ingemeten
+grafcoördinaten zou deze beperking wegvallen.
+
+\section{Haalbaarheid als productieoplossing}
+
+Op basis van de technische evaluatie en de juridische analyse kan worden
+geconcludeerd dat het concept haalbaar is als productieoplossing voor de gemeente
+Sint-Gillis-Waas, mits aan een aantal voorwaarden wordt voldaan:
+
+\begin{enumerate}
+    \item \textbf{Officiële grafdata:} de mockdataset moet worden vervangen door
+    de reële grafdata van WebBGP via een API-koppeling onder een formele
+    verwerkersovereenkomst.
+    \item \textbf{Juridische afspraken:} een privacyverklaring, verwerkersovereenkomst
+    en mogelijk een DPIA zijn vereiste stappen voorafgaand aan ingebruikname.
+    \item \textbf{Platformuitbreiding:} een Android-versie via ARCore of een
+    cross-platform implementatie via Unity AR Foundation vergroot het bereik.
+    \item \textbf{Gebruikersstudie:} een formele test met diverse doelgroepen
+    is noodzakelijk om effectiviteit en gebruiksvriendelijkheid te bevestigen.
+\end{enumerate}
+
+\section{Aanbevelingen voor vervolgonderzoek}
+
+\begin{itemize}
+    \item \textbf{Gebruikersstudie met diverse doelgroepen:} uitvoering van de
+    drie vergelijkende testscenario's met testpersonen van verschillende
+    leeftijden en technologische achtergrond, om de effectiviteit van AR
+    ten opzichte van bestaande navigatiemethoden kwantitatief te meten.
+    
+    \item \textbf{OSM-paddata integratie:} samenwerking met de lokale
+    OpenStreetMap-gemeenschap om het kerkhof in kaart te brengen, zodat
+    een geroute navigatielijn kan worden geïmplementeerd via een open-source
+    routeringsbibliotheek \autocite{Novack2018}.
+    
+    \item \textbf{Koppeling met WebBGP:} onderzoek naar de technische en
+    juridische haalbaarheid van een API-koppeling met het WebBGP-systeem
+    van Cevi voor reële en officieel ingemeten grafdata.
+    
+    \item \textbf{Android-versie:} implementatie via ARCore of Unity AR
+    Foundation om het bereik te vergroten naar Android-gebruikers
+    \autocite{GoogleARCore2024}.
+    
+    \item \textbf{Evaluatie onder diverse weersomstandigheden:} testen bij
+    bewolking, regen en avondlicht om de robuustheid van de ARKit tracking
+    in minder gunstige omstandigheden te beoordelen.
+\end{itemize}
