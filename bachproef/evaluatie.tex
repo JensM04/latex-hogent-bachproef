@@ -32,15 +32,21 @@ directe ondersteuning aan bezoekers.
 
 \subsection{Welke behoeften hebben bezoekers van verschillende leeftijden?}
 
-De interface werd ontworpen volgens de principes van minimale interactie en
-toegankelijkheid. Eén zoekknop, een automatisch verschijnende informatiekaart
-en een cameraweergave die onmiddellijk beschikbaar is, verlagen de drempel
-voor gebruik door minder technologisch vaardige bezoekers \autocite{Haekkilae2022}.
-De testfase bevestigde dat de basisnavigatie intuïtief verloopt.
+De testresultaten tonen een duidelijk verschil in gebruikspatroon tussen de
+twee externe testpersonen. In Scenario A slaagden beide testpersonen er niet
+in het graf te vinden, ongeacht leeftijd of smartphoneervaring. Dit wijst erop
+dat het probleem van kerkhofnavigatie zonder digitale hulp leeftijdsonafhankelijk
+is. In Scenario C toonden de testpersonen echter een duidelijk verschil: TP2
+(20 jaar, smartphoneervaring 4/5) navigeerde snel en intuïtief en ontdekte de
+AR-functionaliteit zelfstandig, terwijl TP3 (49 jaar, smartphoneervaring 2/5)
+een korte tip nodig had om de AR-overlay te ontdekken.
 
-//TODO aanvullen met behoeften van andere testpersonen
-
-% TODO: aanvullen met observaties van extra testpersonen
+Dit bevestigt de bevindingen uit de literatuurstudie dat minder technologisch
+vaardige gebruikers meer begeleiding nodig hebben bij het gebruik van AR-interfaces
+\autocite{Haekkilae2022}. Beide testpersonen bereikten uiteindelijk het geselecteerde
+graf en gaven een positief eindoordeel (8/10 en 7/10), wat aantoont dat de
+basisfunctionaliteit voor beide leeftijdsgroepen toegankelijk is, mits een
+minimale onboarding aanwezig is.
 
 \subsection{Welke emotionele en contextuele factoren spelen een rol?}
 
@@ -61,23 +67,34 @@ uitgesloten op basis van de Wet van 8 augustus 1983 \autocite{WetRijksregister19
 
 \subsection{Hoe kan Augmented Reality ondersteuning bieden bij kerkhofnavigatie?}
 
-De testresultaten bevestigen dat AR een functionele en intuïtieve
-navigatieondersteuning biedt. De 3D-navigatiepijl wees gedurende de volledige
-test correct in de richting van het geselecteerde graf en roteerde vloeiend
-mee bij elke richtingsverandering. De grafmarker werd zichtbaar op circa
-20 meter. AR biedt hierbij een voordeel ten opzichte van klassieke kaartnavigatie:
-de gebruiker hoeft zijn blik niet weg te wenden van de omgeving \autocite{Zhao2025}.
+De vergelijking van de drie testscenario's toont de meerwaarde van AR het
+duidelijkst aan. In Scenario A slaagden beide testpersonen er niet in het
+graf te vinden. In Scenario B vonden ze het graf wel, maar misten ze
+routebegeleiding. In Scenario C was de navigatie het meest volledig en
+intuïtief: de 3D-navigatiepijl wees gedurende alle tests correct in de
+richting van het geselecteerde graf en de grafmarker werd zichtbaar op circa
+20 meter. AR biedt hierbij een fundamenteel voordeel ten opzichte van
+klassieke kaartnavigatie: de gebruiker hoeft zijn blik niet weg te wenden
+van de omgeving \autocite{Zhao2025}.
+
+Opvallend is dat de AR-functionaliteit niet onmiddellijk voor alle
+gebruikers duidelijk was. TP3 ontdekte de AR-overlay pas na een korte tip.
+Dit wijst op de nood aan een minimale onboarding die nieuwe gebruikers
+introduceert tot de werking van de applicatie.
 
 \subsection{Hoe kan AR gecombineerd worden met digitale kaarten of geoloketten?}
 
 De applicatie combineert beide benaderingen: de AR-cameraweergave voor directe
 ruimtelijke navigatie en de satellietminikaart voor contextueel overzicht. De
-minikaart toonde de gebruikerspositie en het geselecteerde graf correct en kon
-worden uitgevouwen naar volledigscherm als alternatieve navigatiemodus. De
-fallback-banner koppelt beide modi automatisch bij tracking-instabiliteit. In
-een productieomgeving kan de kaartcomponent worden uitgebreid met een geroute
+testresultaten tonen aan dat beide elementen actief gebruikt werden: TP2 gebruikte
+de minikaart als primaire oriëntatie, terwijl TP3 na het ontdekken van de AR
+de kaart volledig liet vallen. De combinatie biedt dus flexibiliteit afhankelijk
+van de voorkeur en het technologische profiel van de gebruiker.
+
+In een productieomgeving kan de kaartcomponent worden uitgebreid met een geroute
 navigatielijn op basis van OSM-paddata, zoals beschreven in
-sectie~\ref{sec:routelijn}.
+sectie~\ref{sec:routelijn}. Beide testpersonen gaven dit expliciet aan als
+gewenste verbetering.
 
 \subsection{Welke ontwerprichtlijnen zijn nodig om rust en sereniteit te bewaren?}
 
@@ -101,37 +118,46 @@ hoofdstuk~\ref{ch:juridische-analyse} geeft een volledig overzicht.
 
 De technische evaluatie toonde aan dat een combinatie van functionele controles
 (pijlrichting, markerplaatsing, tracking, zoekfunctie) en observationele meting
-(navigatietijd, gebruiksgemak) een adequate evaluatiemethode vormt voor deze proof of concept. Voor een volwaardige gebruikersevaluatie zijn de drie
-vergelijkende scenario's uit de methodologie vereist, uitgevoerd met testpersonen
-van diverse achtergronden.
-
-
-// todo aanvullen met resultaten andere personen
-% TODO: aanvullen na uitvoering met extra testpersonen
+(navigatietijd, gebruiksgemak, subjectief oordeel) een adequate evaluatiemethode
+vormt voor een proof of concept in dit stadium. De toevoeging van externe
+testpersonen met uiteenlopende technologische achtergronden leverde kwalitatieve
+inzichten op die louter technische evaluatie niet had kunnen opleveren, zoals de
+nood aan onboarding en de voorkeur voor de minikaart als primaire oriëntatie.
 
 \section{Evaluatie van het proof of concept}
 
 \subsection{Wat werkt goed}
 
-De technische evaluatie toont aan dat de kernfunctionaliteit correct werkt.
-De AR-navigatiepijl is betrouwbaar, responsief en altijd zichtbaar. De grafmarker
-is zichtbaar van op een afstand die praktisch bruikbaar is op kerkhofschaal.
-De zoekfunctie, minikaart en afstandslabel functioneren allen correct. De
-applicatie opent onmiddellijk op de cameraweergave zonder laadtijd of onboarding.
-Het fallback-mechanisme werkte correct bij gesimuleerde tracking-degradatie.
+De technische evaluatie en de gebruikerstests tonen aan dat de kernfunctionaliteit
+correct werkt. De AR-navigatiepijl is betrouwbaar, responsief en wees gedurende
+alle tests in de juiste richting. De grafmarker is zichtbaar van op een afstand
+die praktisch bruikbaar is op kerkhofschaal. De zoekfunctie, minikaart en
+afstandslabel functioneren allen correct. De applicatie opent onmiddellijk op
+de cameraweergave zonder laadtijd of onboarding. Het fallback-mechanisme werkte
+correct bij gesimuleerde tracking-degradatie. De subjectieve scores van 7/10 en
+8/10 bevestigen dat de applicatie als bruikbaar en waardevol wordt ervaren.
 
 \subsection{Wat kan beter}
 
-De voornaamste tekortkoming is de navigatiestijl van de pijl. De pijl wijst
-steeds in een rechte lijn naar het geselecteerde graf, ongeacht de aanwezige
-paden. In de praktijk is het voor een gebruiker niet altijd duidelijk welk pad
-hij moet volgen. Een padsgewijze navigatie met expliciete instructies zou de
-gebruikerservaring aanzienlijk verbeteren, maar vereist GIS-paddata die
-momenteel niet beschikbaar is.
+Op basis van de testresultaten werden drie concrete verbeterpunten geïdentificeerd:
 
-Daarnaast is de nauwkeurigheid van de grafmarkerplaatsing beperkt door de
-kwaliteit van de mockdata. In een productieomgeving met officieel ingemeten
-grafcoördinaten zou deze beperking wegvallen.
+\begin{itemize}
+    \item \textbf{Vorm van de navigatiepijl:} de huidige 3D-geometrie wordt
+    niet onmiddellijk herkend als een navigatiepijl. Een meer herkenbare
+    pijlvorm zou de bruikbaarheid verhogen, vooral voor gebruikers zonder
+    AR-ervaring.
+    
+    \item \textbf{Ontbrekende onboarding:} geen van de externe testpersonen
+    had eerder AR gebruikt, en TP3 ontdekte de AR-overlay pas na een tip.
+    Een korte introductiemelding bij het eerste gebruik, die de gebruiker
+    instrueert de camera rechtvooruit te richten, zou dit probleem oplossen.
+    
+    \item \textbf{Padsgewijze navigatie:} de pijl wijst steeds in een rechte
+    lijn naar het geselecteerde graf. Beide externe testpersonen gaven aan dat
+    een routelijn langs de bestaande paden, zowel op de kaart als in AR op de
+    grond, de navigatie aanzienlijk zou verbeteren. Dit vereist GIS-paddata
+    die momenteel niet beschikbaar is.
+\end{itemize}
 
 \section{Haalbaarheid als productieoplossing}
 
@@ -147,17 +173,25 @@ Sint-Gillis-Waas, mits aan een aantal voorwaarden wordt voldaan:
     en mogelijk een DPIA zijn vereiste stappen voorafgaand aan ingebruikname.
     \item \textbf{Platformuitbreiding:} een Android-versie via ARCore of een
     cross-platform implementatie via Unity AR Foundation vergroot het bereik.
-    \item \textbf{Gebruikersstudie:} een formele test met diverse doelgroepen
-    is noodzakelijk om effectiviteit en gebruiksvriendelijkheid te bevestigen.
+    \item \textbf{Gebruikersstudie:} een formele test met diverse doelgroepen,
+    inclusief oudere bezoekers, is noodzakelijk om effectiviteit en
+    gebruiksvriendelijkheid volledig te bevestigen.
 \end{enumerate}
 
 \section{Aanbevelingen voor vervolgonderzoek}
 
 \begin{itemize}
+    \item \textbf{Onboarding toevoegen:} een korte introductiemelding bij het
+    eerste gebruik die de gebruiker instrueert de camera rechtvooruit te richten.
+    Dit was de meest directe en concrete aanbeveling van beide externe testpersonen.
+    
+    \item \textbf{Pijlvorm verbeteren:} de 3D-geometrie van de navigatiepijl
+    aanpassen zodat ze beter overeenkomt met een klassieke, herkenbare pijlvorm.
+    
     \item \textbf{Gebruikersstudie met diverse doelgroepen:} uitvoering van de
-    drie vergelijkende testscenario's met testpersonen van verschillende
-    leeftijden en technologische achtergrond, om de effectiviteit van AR
-    ten opzichte van bestaande navigatiemethoden kwantitatief te meten.
+    drie vergelijkende testscenario's met testpersonen van verschillende leeftijden
+    en technologische achtergrond, inclusief 65-plussers, om de effectiviteit van
+    AR ten opzichte van bestaande navigatiemethoden kwantitatief te meten.
     
     \item \textbf{OSM-paddata integratie:} samenwerking met de lokale
     OpenStreetMap-gemeenschap om het kerkhof in kaart te brengen, zodat

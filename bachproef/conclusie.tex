@@ -13,40 +13,51 @@ De centrale onderzoeksvraag luidde: \textit{Op welke manier kan digitalisatie,
 
 Op basis van dit onderzoek kan worden besloten dat augmented reality een
 technisch haalbare en functionele oplossing biedt voor kerkhofnavigatie. De
-ontwikkelde proof of concept toont aan dat een 3D AR-navigatiepijl in combinatie
-met een world-locked grafmarker de gebruiker correct en intuïtief naar een
-geselecteerd graf kan leiden, zonder dat de gebruiker zijn blik op de omgeving
-moet veranderen. De technische evaluatie bevestigde dat alle kerncomponenten correct
-functioneren: de pijl wees gedurende de volledige test in de juiste richting,
-de grafmarker werd zichtbaar op circa 20 meter, de ARKit world tracking was
-stabiel vanaf de eerste seconde, en de zoekfunctie, minikaart en afstandslabel
-functioneerden allen correct.
+vergelijking van de drie testscenario's maakt de meerwaarde van elke extra laag
+digitale ondersteuning concreet meetbaar. In Scenario A, zonder enige digitale
+hulp, slaagden beide externe testpersonen er niet in het geselecteerde graf te
+vinden. Ze ervoeren het zoeken als frustrerend en stressvol, wat de bevindingen
+uit de literatuurstudie bevestigt \autocite{Haekkilae2022}. In Scenario B,
+met enkel de kaartweergave, vonden beide testpersonen het graf wel, maar misten
+ze een routelijn langs de bestaande paden. In Scenario C, met de volledige
+AR-applicatie, verliep de navigatie het meest intuïtief en snel, met navigatietijden
+van 2 minuten 35 seconden tot  5 minuten 30 seconden en subjectieve scores van 7/10 en 8/10.
 
-Tegelijkertijd maakt dit onderzoek duidelijk dat AR geen op zichzelf staande
-oplossing is. De combinatie met een digitale kaartweergave is essentieel: de
-minikaart biedt de ruimtelijke context die pure AR mist, en fungeert als
-betrouwbare fallback wanneer AR-tracking tijdelijk instabiel is. Dit hybride
-model, waarbij AR en kaart elkaar aanvullen in plaats van vervangen, is de
-sterkste bevinding van dit onderzoek.
+De ontwikkelde proof of concept toont aan dat een 3D AR-navigatiepijl in
+combinatie met een world-locked grafmarker de gebruiker correct naar een
+geselecteerd graf kan leiden, zonder dat de gebruiker zijn blik van de omgeving
+moet wenden. Tegelijkertijd maakt dit onderzoek duidelijk dat AR geen op
+zichzelf staande oplossing is. De combinatie met een digitale kaartweergave is
+essentieel: de minikaart biedt de ruimtelijke context die pure AR mist, en
+fungeert als betrouwbare fallback wanneer AR-tracking tijdelijk instabiel is.
+Dit hybride model, waarbij AR en kaart elkaar aanvullen in plaats van vervangen,
+is de sterkste bevinding van dit onderzoek.
 
 \section{Technische bevindingen}
 
 \begin{itemize}
     \item \textbf{ARKit .gravityAndHeading} maakt directe GPS-naar-AR conversie
     mogelijk via een vlakke-Aarde-benadering met een fout van minder dan 0,01\%
-    binnen 500 meter, wat zeker volstaat voor kerkhofschaal.
+    binnen 500 meter, wat volstaat voor kerkhofschaal.
     
-    \item \textbf{GPS-nauwkeurigheid} blijft de voornaamste beperking.
+    \item \textbf{GPS-nauwkeurigheid} blijft de voornaamste inherente beperking.
     Op een begraafplaats met grafstenen die slechts 60 tot 80 centimeter uit
     elkaar staan, is een GPS-nauwkeurigheid van 3 tot 10 meter onvoldoende voor
-    exacte grafsteen-identificatie. Duidelijke visuele markers en officieel
-    ingemeten coördinaten zijn noodzakelijk om dit te compenseren.
+    exacte grafsteen-identificatie. De testresultaten bevestigen dit: de marker
+    landde consistent enkele graven naast de correcte positie door de handmatig
+    ingevoerde mockdata. Duidelijke visuele markers en officieel ingemeten
+    coördinaten zijn noodzakelijk om dit in een productieomgeving te compenseren.
     
     \item \textbf{Padsgewijze navigatie} ontbreekt. De huidige pijlnavigatie
-    wijst steeds in een rechte lijn naar het graf. Voor een optimale
-    gebruikerservaring is een routelijn langs de bestaande paden gewenst,
-    waarvoor GIS-paddata vereist is. OpenStreetMap biedt hiervoor een
-    schaalbare oplossing \autocite{Novack2018}.
+    wijst steeds in een rechte lijn naar het graf. Beide externe testpersonen
+    gaven dit expliciet aan als gewenste verbetering, zowel op de kaart als
+    in AR op de grond. OpenStreetMap biedt hiervoor een schaalbare oplossing
+    zodra de begraafplaats voldoende in kaart is gebracht \autocite{Novack2018}.
+    
+    \item \textbf{Onboarding ontbreekt.} Eén van de twee externe testpersonen
+    ontdekte de AR-overlay pas na een tip van de testleider. Een korte
+    introductiemelding bij het eerste gebruik is een eenvoudige maar essentiële
+    verbetering voor gebruikers zonder AR-ervaring.
     
     \item \textbf{Platformonafhankelijkheid} is aangetoond: alle technische
     componenten hebben een directe equivalent op Android via ARCore en Google's
@@ -57,20 +68,47 @@ sterkste bevinding van dit onderzoek.
 \section{Juridische bevindingen}
 
 \begin{itemize}
-    \item Grafdata van overledenen valt buiten de bescherming van de GDPR,
+    \item Grafdata van overledenen valt buiten de beschermingssfeer van de GDPR,
     maar vereist zorgvuldig gebruik vanwege de mogelijke indirecte link met
     levende familieleden.
-    \item Het rijksregisternummer mag onder geen enkele reden worden verwerkt in een
+    \item Het rijksregisternummer mag nooit worden verwerkt in een
     publieke navigatieapplicatie op basis van de Wet van 8 augustus 1983
     \autocite{WetRijksregister1983}.
     \item Voor een productieomgeving zijn een verwerkersovereenkomst met de
-    gemeente, een privacyverklaring en mogelijk een DPIA vereiste stappen.
+    gemeente, een privacyverklaring en mogelijk een DPIA vereiste stappen
+    voorafgaand aan ingebruikname.
 \end{itemize}
 
 \section{Beperkingen van dit onderzoek}
 
-//todo
-%todo aanvullen
+Dit onderzoek kent een aantal erkende beperkingen die de interpretatie van de
+resultaten kaderen:
+
+\begin{itemize}
+    \item \textbf{Beperkt aantal testpersonen:} de evaluatie omvatte drie
+    deelnemers. Statistische generalisatie is niet mogelijk; de bevindingen
+    zijn kwalitatief van aard. 
+    
+    \item \textbf{Geen oudere doelgroep:} de oudste testpersoon was 49 jaar.
+    Bezoekers van 65 jaar en ouder, die een significante doelgroep vormen op
+    begraafplaatsen, werden niet geëvalueerd. De feedback van de testpersonen
+    biedt echter concrete aanknopingspunten om de applicatie ook voor oudere
+    gebruikers toegankelijk te maken: een onboarding die de gebruiker instrueert
+    de camera rechtvooruit te richten, een duidelijkere pijlvorm en een
+    routelijn op de kaart zijn verbeteringen die de drempel voor minder
+    technologisch vaardige gebruikers aanzienlijk kunnen verlagen.
+    
+    \item \textbf{Ideale weersomstandigheden:} alle tests vonden plaats bij
+    helder zonnig weer. De werking bij bewolking, regen of avondlicht werd
+    niet geëvalueerd. De applicatie beschikt wel over een automatisch
+    fallback-mechanisme dat de gebruiker naar de kaartweergave leidt wanneer
+    de AR-tracking instabiel wordt. Dit mechanisme werd handmatig getest door
+    de cameralens af te dekken en functioneerde correct: de fallback-banner
+    verscheen na 3 seconden en verdween automatisch bij herstel van de tracking.
+    
+    \item \textbf{Mockdata:} de grafcoördinaten zijn handmatige benaderingen
+    op basis van Google Maps en wijken af van de werkelijke grafposities.
+\end{itemize}
 
 \section{Maatschappelijke relevantie}
 
@@ -81,6 +119,11 @@ probleem op te lossen: het gemakkelijker en minder stressvol maken van het
 terugvinden van een graf. De keuze voor een discreet, snel en intuïtief ontwerp
 weerspiegelt het idee dat technologie in deze context de achtergrond moet
 blijven, en de mens op de voorgrond.
+
+De testresultaten bevestigen dat het verschil tussen Scenario A en Scenario C
+significant is: van een gefaalde, frustrerende zoektocht naar een succesvolle
+navigatie in minder dan 3 minuten. Dit is de kern van de maatschappelijke
+meerwaarde van dit onderzoek.
 
 Indien deze proof of concept verder wordt ontwikkeld en geïmplementeerd door de
 gemeente Sint-Gillis-Waas of een vergelijkbare gemeente, betekent het een

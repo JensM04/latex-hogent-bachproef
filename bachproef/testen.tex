@@ -1,13 +1,11 @@
 \chapter{\IfLanguageName{dutch}{Testen}{Testing}}%
 \label{ch:testen}
 
-% TODO nieuwe testpersonen
-//TODO -> dit hoofdstuk wordt nog aangepast na het testen met andere personen. nu heb enkel ikzelf de applicatie getest
-
 Dit hoofdstuk beschrijft de uitvoering van de testfase op het gemeentelijk
 kerkhof van Sint-Gillis-Waas. De testopzet zoals gedefinieerd in de methodologie
-werd gevolgd, met een technische evaluatie van alle kernfunctionaliteiten van de
-applicatie en een observationele meting van de navigatietijd en gebruiksgemak.
+werd gevolgd, met een observationele meting van de navigatietijd en gebruiksgemak
+over drie testscenario's. In totaal namen drie testpersonen deel aan de evaluatie,
+waaronder de onderzoeker zelf en twee externe deelnemers.
 
 \section{Testopzet}
 
@@ -19,124 +17,300 @@ De omstandigheden tijdens de test waren als volgt:
     \item \textbf{Weersomstandigheden:} helder en zonnig
     \item \textbf{Tijdstip:} overdag
     \item \textbf{Toestel:} iPhone met iOS, ARKit-compatibel
-    \item \textbf{Testpersonen:} % TODO: aantal testpersonen invullen na uitvoering
-    // TODO: aantal testpersonen invullen na uitvoering
+    \item \textbf{Testpersonen:} drie deelnemers (zie tabel~\ref{tab:testpersonen})
 \end{itemize}
-
-Zoals beschreven in de methodologie werden drie testscenario's gedefinieerd.
-In deze testronde werd \textbf{Scenario C} (kaartweergave met AR) volledig
-doorlopen. % TODO: scenario A en B toevoegen indien uitgevoerd met extra testpersonen.
-// TODO: scenario A en B toevoegen 
-
-\section{Scenario C: Kaartweergave met AR}
-
-\subsection{Verloop van de test}
-
-De testpersoon opende de applicatie aan de ingang van het kerkhof en zocht via
-de zoekknop een specifiek graf op uit de mockdataset. Na selectie van het graf
-startte de AR-navigatie onmiddellijk: de 3D-navigatiepijl verscheen in de
-cameraweergave en de minikaart toonde de positie van het geselecteerde graf.
-De testpersoon volgde de aanwijzingen van de applicatie tot het geselecteerde
-graf werd bereikt.
-
-De totale navigatietijd van de ingang tot aan het graf bedroeg
-\textbf{ongeveer 6 minuten}.
-% TODO: navigatietijden van extra testpersonen toevoegen
-//todo tijden van de andere personen toevoegen
-
-\subsection{AR-navigatiepijl}
-
-De navigatiepijl functioneerde correct gedurende de volledige test. De pijl
-wees op elk moment in de richting van het geselecteerde graf en roteerde vloeiend
-mee wanneer de testpersoon van richting veranderde. Er werden geen fouten of
-onverwachte sprong-bewegingen waargenomen.
-
-Een relevante observatie betreft de aard van de navigatiebegeleiding. De pijl
-wijst steeds in een rechte lijn naar het geselecteerde graf, ongeacht de
-aanwezige paden of obstakels. In de praktijk betekent dit dat de gebruiker
-zelf moet bepalen welk pad hij neemt om de bestemming te bereiken. Een ideale
-navigatieoplossing zou de gebruiker langs de bestaande looppaden leiden, met
-instructies zoals ``neem links, dan rechts''. Dit vereist echter GIS-paddata
-van het kerkhof, zoals uitgebreid besproken in sectie~\ref{sec:routelijn}.
-De rechte pijlnavigatie is dan ook geen technische tekortkoming van de
-AR-component, maar een directe consequentie van de ontbrekende paddata.
-
-\subsection{Grafmarker}
-
-De world-locked grafmarker verscheen op het moment dat de testpersoon zich op
-circa \textbf{20 meter} van de geselecteerde grafpositie bevond. Op die afstand
-was de verticale lichtbalk duidelijk zichtbaar boven de omgeving, wat het
-beoogde doel van de marker als visueel baken bevestigt.
-
-Wat betreft de positioneringsnauwkeurigheid: de marker landde dichtbij de correcte grafsteen. Een exacte plaatsing is echter inherent beperkt
-door de aard van de mockdata: de coördinaten werden handmatig ingevoerd op
-basis van Google Maps en zijn benaderingen van de werkelijke grafposities.
-Voor productiewaardige nauwkeurigheid zijn officieel ingemeten coördinaten
-vereist, zoals die beschikbaar zijn in het WebBGP-systeem van de gemeente.
-
-\subsection{ARKit tracking}
-
-Het trackingstatusslabel toonde \textbf{onmiddellijk ``AR Active''} na het
-opstarten van de applicatie. De initialisatietijd bedroeg ongeveer
-\textbf{1 seconde}. Gedurende de volledige test bleef de trackingstatus stabiel,
-zonder degradatie naar de statussen ``Insufficient Features'' of ``Slow Down''.
-Dit is een positief resultaat voor een zonnige buitenomgeving.
-
-\subsection{Fallback-banner}
-
-De automatische fallback-banner werd tijdens de normale navigatie niet
-geactiveerd, wat correct is: de AR-tracking was stabiel. De werking van de
-banner werd apart getest door de cameralens gedurende enkele seconden af te
-dekken. Na de geconfigureerde vertraging van 3 seconden verscheen de banner
-correct met de opties om de kaart te openen of de banner te sluiten. Bij het
-vrijgeven van de camera herstelde de tracking naar normaal en verdween de
-banner automatisch.
-
-\subsection{Zoekfunctie en minikaart}
-
-De zoekfunctie vond de correcte grafrecords bij het intypen van een naam. De
-minikaart toonde de gebruikerspositie en het geselecteerde graf correct. De
-volledigschermanimatie van de minikaart werkte vloeiend. Het afstandslabel
-toonde een nauwkeurige benadering van de afstand en werkte continu bij.
-
-\section{Samenvatting van de testresultaten}
-
-Tabel~\ref{tab:testresultaten} geeft een overzicht van de meetindicatoren en
-de bijhorende resultaten.
 
 \begin{table}[h]
     \centering
-    \caption[Overzicht testresultaten]{Overzicht van de meetindicatoren en
-        resultaten van de technische evaluatie (Scenario C).}
-    \label{tab:testresultaten}
+    \caption[Overzicht testpersonen]{Profiel van de drie testpersonen.}
+    \label{tab:testpersonen}
     \renewcommand{\arraystretch}{1.4}
-    \begin{tabular}{p{4.5cm} p{7.5cm}}
+    \begin{tabular}{p{1.5cm} p{2cm} p{4cm} p{2.5cm} p{2cm}}
         \hline
-        \textbf{Indicator} & \textbf{Resultaat} \\
+        \textbf{ID} & \textbf{Leeftijd} & \textbf{Smartphoneervaring (1--5)} & \textbf{AR-ervaring} & \textbf{Context} \\
         \hline
-        Navigatietijd & $\pm$ 6 minuten van ingang tot graf \\
+        TP1 & 22 & 5/5 & Ja & Onderzoeker \\
         \hline
-        Pijlrichting correct & Ja, continu correct gedurende de volledige test \\
+        TP2 & 20 & 4/5 & Nee & Geen \\
         \hline
-        Marker zichtbaar vanaf & $\pm$ 20 meter \\
-        \hline
-        GPS-positionering marker & Benaderd correct; nauwkeurigheid beperkt door mockdata \\
-        \hline
-        ARKit tracking & Stabiel; ``AR Active'' na $\pm$ 1 seconde \\
-        \hline
-        Fallback-banner & Correct geactiveerd bij gesimuleerde tracking-degradatie \\
-        \hline
-        Zoekfunctie & Correct; graven gevonden op naam \\
-        \hline
-        Minikaart positie & Correct; gebruikerspositie en grafannotatie zichtbaar \\
-        \hline
-        Afstandslabel & Nauwkeurig en continu bijgewerkt \\
-        \hline
-        Weersomstandigheden & Zonnig; geen tracking-problemen vastgesteld \\
+        TP3 & 49 & 2/5 & Nee & Geen \\
         \hline
     \end{tabular}
 \end{table}
 
-//TODO tabel uitbreiden met resultaten van nieuwe testpersonen
+De twee externe testpersonen (TP2 en TP3) kregen vooraf geen enkele uitleg over
+de werking van de applicatie. Dit was een bewuste keuze: door nul context te
+geven, werd de intuïtiviteit van de interface getest zoals een echte bezoeker
+die voor het eerst de applicatie opent.
 
-% TODO: tabel uitbreiden met resultaten van extra testpersonen
+Alle drie scenario's werden doorlopen door de externe testpersonen:
+
+\begin{itemize}
+    \item \textbf{Scenario A:} navigeren zonder enige vorm van hulp, enkel op
+    basis van de naam en het overlijdensjaar van de overledene.
+    \item \textbf{Scenario B:} navigeren met de applicatie maar zonder gebruik
+    te maken van de AR-functionaliteit, enkel via de kaartweergave.
+    \item \textbf{Scenario C:} navigeren met de volledige applicatie, inclusief
+    de AR-navigatiepijl en de grafmarker.
+\end{itemize}
+
+\section{Scenario A: Navigatie zonder applicatie}
+
+In Scenario A kregen de testpersonen enkel de naam en het overlijdensjaar van
+de te zoeken persoon, zonder enige manier van hulp. Dit scenario
+simuleert de situatie van een bezoeker die voor het eerst een onbekend kerkhof
+bezoekt zonder voorbereiding.
+
+Beide testpersonen slaagden er niet in het graf zelfstandig te vinden. Het
+verloop van de zoektocht kenmerkte zich door twee terugkerende strategieën die
+beide geen resultaat opleverden:
+
+\begin{itemize}
+    \item \textbf{Zoeken op overlijdensjaar:} de testpersonen veronderstelden
+    dat graven chronologisch gerangschikt zouden zijn, zoals op sommige
+    begraafplaatsen het geval is. Op het kerkhof van Sint-Gillis-Waas is dit
+    wel het geval, maar enkel onderverdeelt op bepaalde sectoren. Hierdoor werkte deze strategie niet.
+    \item \textbf{Zoeken op alfabetische volgorde:} de testpersonen probeerden
+    de naam te lokaliseren door de grafstenen rij per rij te lezen in de hoop
+    een alfabetische ordening te vinden. Ook dit leverde geen resultaat op,
+    en het systematisch overlopen van alle rijen duurde te lang om binnen een
+    redelijke tijd te voltooien.
+\end{itemize}
+
+Beide testpersonen ervoeren dit scenario als bijzonder frustrerend en stressvol.
+De uniformiteit van de grafstenenrijen op het kerkhof van Sint-Gillis-Waas, waarbij
+alle rijen visueel sterk op elkaar lijken, maakte het zoeken extra verwarrend.
+Dit bevestigt de bevindingen uit de literatuurstudie dat het terugvinden van een
+graf zonder digitale ondersteuning een stressvolle en tijdrovende ervaring kan
+zijn \autocite{Haekkilae2022}.
+
+\section{Scenario B: Navigatie met kaartweergave}
+
+In Scenario B maakten de testpersonen gebruik van de applicatie, maar uitsluitend
+via de kaartweergave. De AR-functionaliteit werd in dit scenario niet geactiveerd.
+
+Beide testpersonen slaagden erin het geselecteerde graf te vinden. De minikaart
+met de positie van het graf gaf voldoende oriëntatie om de juiste rij en sectie
+te bereiken. De combinatie van de gebruikerspositie als blauw stipje en de
+grafannotatie als pictogram op de satellietkaart bleek voldoende informatief
+voor succesvolle navigatie.
+
+Een opvallende en consistente observatie bij beide testpersonen was de afwezigheid
+van een navigatielijn. Beide testpersonen merkten spontaan op dat ze een
+routelijn verwachtten, vergelijkbaar met de navigatiefunctie in Google Maps of
+Apple Maps, die hen stap voor stap langs de bestaande paden naar het graf zou
+leiden. De huidige kaartweergave toont enkel de positie van het graf, zonder
+een geroute lijn. Hierdoor moesten de testpersonen zelf inschatten welk pad
+ze moesten nemen, wat als een duidelijke beperking werd ervaren.
+
+Dit scenario bevestigt dat een digitale kaart een significante verbetering biedt
+ten opzichte van Scenario A, maar dat de gebruikerservaring verder kan worden
+verbeterd door de toevoeging van een padsgewijze routelijn. De technische en
+juridische beperkingen van deze feature worden besproken in
+sectie~\ref{sec:routelijn}.
+
+\section{Scenario C: Navigatie met volledige AR-applicatie}
+
+\subsection{TP1 -- Onderzoeker (referentiemeting)}
+
+De onderzoeker voerde de eerste test uit als referentiemeting. De applicatie
+werd geopend aan de ingang van het kerkhof, een graf werd geselecteerd via de
+zoekknop, en de AR-navigatiepijl volgde onmiddellijk. De totale navigatietijd
+bedroeg \textbf{ongeveer 3 minuten}. Alle kerncomponenten functioneerden
+correct: de pijl wees voortdurend in de juiste richting, de grafmarker werd
+zichtbaar op circa 20 meter, de ARKit tracking was stabiel vanaf de eerste
+seconde, en de minikaart en het afstandslabel werkten correct.
+
+De navigatiepijl wees steeds in een rechte lijn naar het geselecteerde graf,
+ongeacht de aanwezige paden of obstakels. In de praktijk betekent dit dat de
+gebruiker zelf moet bepalen welk pad hij neemt. Een ideale navigatieoplossing
+zou de gebruiker langs de bestaande looppaden leiden, maar dit vereist
+GIS-paddata die momenteel niet beschikbaar is, zoals uitgebreid besproken in
+sectie~\ref{sec:routelijn}.
+
+\subsection{TP2 -- 20 jaar, smartphoneervaring 4/5}
+
+TP2 voltooide de navigatie in \textbf{2 minuten en 35 seconden}, de snelste
+tijd van alle testpersonen. De testpersoon had geen moeite met het gebruiken van de app.
+
+De \textbf{minikaart} werd als eerste en meest waardevolle interface-element
+gebruikt. TP2 gebruikte de satellietkaart om de positie van het geselecteerde
+graf te bepalen en de richting te verstaan voordat de AR-pijl actief werd
+geraadpleegd.
+
+De \textbf{navigatiepijl} gaf de juiste richting aan, maar de visuele vorm
+ervan werd als onduidelijk ervaren. TP2 merkte op dat de geometrie van de pijl
+niet onmiddellijk herkend werd als een navigatiepijl: de 3D-vorm leek niet
+genoeg op een klassieke pijlvorm. De richting zelf was echter duidelijk.
+
+TP2 suggereerde dat een melding of hint zou helpen om de gebruiker te informeren
+dat de camera rechtvooruit gericht moet worden om de AR-elementen optimaal te zien.
+
+\subsection{TP3 -- 49 jaar, smartphoneervaring 2/5}
+
+TP3 voltooide de navigatie in \textbf{5 minuten en 30 seconden}. Het verloop
+van de test verliep in twee duidelijke fasen.
+
+In de \textbf{eerste fase} maakte TP3 uitsluitend gebruik van de minikaart.
+De AR-functionaliteit werd aanvankelijk niet opgemerkt. TP3 probeerde via de
+kaart in te zoomen om de omgeving van het graf beter te begrijpen en een
+looproute te plannen. De zoekfunctie werd pas na enige exploratie ontdekt.
+
+Na een korte tip van de testleider om de camera rechtvooruit te richten, ving
+de \textbf{tweede fase} aan. Eens de AR-pijl en de grafmarker zichtbaar waren,
+gebruikte TP3 de kaart niet meer en bereikte het geselecteerde graf zelfstandig
+zonder verdere hulp. De pijl werd in deze fase als zeer duidelijk ervaren.
+
+Dit verloop illustreert een belangrijk ontwerppunt: de applicatie opent
+onmiddellijk op de cameraweergave, maar de AR-elementen zijn enkel zichtbaar
+wanneer de camera horizontaal gericht is. Gebruikers die intuïtief naar de kaart
+grijpen, kunnen de AR-laag volledig missen zonder begeleiding.
+
+\subsection{Gemeenschappelijke observaties}
+
+Bij alle drie testpersonen waren de volgende observaties consistent:
+
+\begin{itemize}
+    \item De \textbf{grafmarker} was zichtbaar op circa 20 meter en de verticale
+    lichtbalk was duidelijk herkenbaar als visueel baken op afstand.
+    \item De \textbf{GPS-positionering} van de marker was benaderd correct, maar
+    consistent enkele graven naast de werkelijke positie. Dit is een directe
+    consequentie van de handmatig ingevoerde coördinaten op basis van Google Maps.
+    Alle testpersonen slaagden er desondanks in het correcte graf te identificeren.
+    \item De \textbf{ARKit tracking} was gedurende alle tests stabiel. Het
+    trackingstatusslabel toonde onmiddellijk ``AR Active'' na het opstarten,
+    met een initialisatietijd van ongeveer 1 seconde.
+    \item De \textbf{fallback-banner} werd tijdens de normale navigatie niet
+    geactiveerd. De werking werd apart getest door de cameralens af te dekken:
+    na 3 seconden verscheen de banner correct en verdween automatisch bij herstel.
+    \item De \textbf{zoekfunctie} vond de correcte grafrecords bij het intypen
+    van een naam. Het \textbf{afstandslabel} toonde een nauwkeurige benadering
+    en werkte continu bij.
+\end{itemize}
+
+\section{Vergelijking van de drie scenario's}
+
+Tabel~\ref{tab:scenariovergelijking} geeft een beknopt overzicht van de drie
+scenario's naast elkaar.
+
+\begin{table}[h]
+    \centering
+    \caption[Vergelijking testscenario's]{Vergelijkend overzicht van de drie
+        testscenario's.}
+    \label{tab:scenariovergelijking}
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabular}{p{3cm} p{3.5cm} p{3.5cm} p{3cm}}
+        \hline
+        \textbf{Criterium} & \textbf{Scenario A} & \textbf{Scenario B} & \textbf{Scenario C} \\
+        \hline
+        Graf gevonden & Nee & Ja & Ja \\
+        \hline
+        Navigatietijd & N.v.t. & Niet gemeten & 2m35s -- 5m30s \\
+        \hline
+        Frustratieniveau & Hoog & Laag & Zeer laag \\
+        \hline
+        Routebegeleiding & Geen & Positie enkel & Pijl + marker \\
+        \hline
+        Ontbrekende feature & -- & Routelijn & Routelijn / onboarding \\
+        \hline
+    \end{tabular}
+\end{table}
+
+De vergelijking toont duidelijk de meerwaarde van elke extra laag digitale
+ondersteuning. Scenario A resulteerde in een gefaalde navigatie gepaard met
+stress en frustratie. Scenario B leidde tot succesvolle navigatie maar miste
+de routebegeleiding die gebruikers verwachten. Scenario C bood de meest
+volledige ervaring, met als voornaamste aandachtspunten de onboarding voor
+nieuwe gebruikers en de vorm van de navigatiepijl.
+
+\section{Samenvatting van de testresultaten}
+
+Tabel~\ref{tab:testresultaten} geeft een overzicht van de meetindicatoren voor
+Scenario C voor alle drie testpersonen.
+
+\begin{table}[h]
+    \centering
+    \caption[Overzicht testresultaten Scenario C]{Overzicht van de meetindicatoren
+        van Scenario C voor alle testpersonen.}
+    \label{tab:testresultaten}
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabular}{p{4cm} p{3cm} p{3cm} p{3cm}}
+        \hline
+        \textbf{Indicator} & \textbf{TP1} & \textbf{TP2} & \textbf{TP3} \\
+        \hline
+        Navigatietijd & $\pm$ 3 min & 2 min 35 sec & 5 min 30 sec \\
+        \hline
+        Pijlrichting correct & Ja & Ja & Ja \\
+        \hline
+        Pijlvorm duidelijk & -- & Nee & Ja \\
+        \hline
+        Marker zichtbaar vanaf & $\pm$ 20 m & $\pm$ 20 m & $\pm$ 20 m \\
+        \hline
+        GPS-positionering marker & Benaderd & Benaderd & Benaderd \\
+        \hline
+        ARKit tracking & Stabiel & Stabiel & Stabiel \\
+        \hline
+        Minikaart gebruikt & Ja & Ja (primair) & Ja (initieel) \\
+        \hline
+        AR ontdekt zonder hulp & Ja & Ja & Nee \\
+        \hline
+        Subjectief oordeel & -- & 8/10 & 7/10 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\section{Observaties en feedback van testpersonen}
+
+Naast de kwantitatieve meetindicatoren gaven de externe testpersonen een aantal
+kwalitatieve observaties en suggesties:
+
+\begin{itemize}
+    \item \textbf{Vorm van de navigatiepijl:} TP2 merkte op dat de geometrie
+    van de 3D-pijl niet onmiddellijk herkend werd als een navigatiepijl. Hoewel
+    de richting correct en duidelijk was, doet de huidige 3D-vorm te weinig
+    denken aan een klassieke pijlvorm.
+    
+    \item \textbf{Ontbrekende onboarding:} beide externe testpersonen hadden
+    nooit eerder AR gebruikt en merkten op dat een korte introductie of hint
+    zou helpen. Concreet werd gesuggereerd om een melding te tonen die de
+    gebruiker instrueert de camera rechtvooruit te richten om de AR-overlay
+    te activeren.
+    
+    \item \textbf{Routelijn op de kaart:} zowel in Scenario B als in Scenario C
+    gaven beide testpersonen aan dat een navigatielijn op de kaart, vergelijkbaar
+    met Google Maps, de gebruikerservaring sterk zou verbeteren.
+    
+    \item \textbf{Routelijn in AR op de grond:} TP3 suggereerde ook een
+    virtuele lijn op de grond in de AR-weergave, zodat de gebruiker de telefoon
+    niet continu omhoog hoeft te houden. Dit sluit aan bij de grondlijnfeature
+    die in de ontwerpfase werd overwogen maar niet geïmplementeerd werd wegens
+    de ontbrekende GIS-paddata (zie sectie~\ref{sec:routelijn}).
+    
+    \item \textbf{Beschikbaarheid op meerdere kerkhoven:} TP3 gaf aan de
+    applicatie te willen gebruiken, maar enkel als ze beschikbaar is op meerdere
+    begraafplaatsen. Lokale kerkhoven worden vaak bezocht door mensen die de
+    locatie al kennen; de meerwaarde is het grootst op onbekende of grotere
+    begraafplaatsen.
+\end{itemize}
+
+\section{Beperkingen van de testfase}
+\label{sec:testbeperkingen}
+
+\begin{itemize}
+    \item \textbf{Beperkt aantal testpersonen:} de evaluatie omvatte drie
+    deelnemers. Dit is onvoldoende voor statistische generalisatie, maar
+    zeker voldoende voor een kwalitatieve evaluatie van een proof of concept in
+    dit stadium.
+    
+    \item \textbf{Geen kwantitatieve data voor Scenario A en B:} voor de
+    scenario's zonder AR werden geen precieze navigatietijden gemeten. De
+    beschrijving van deze scenario's is dan ook kwalitatief van aard en
+    gebaseerd op observaties tijdens de test.
+    
+    \item \textbf{Ideale weersomstandigheden:} de tests vonden uitsluitend
+    plaats bij helder zonnig weer. De stabiliteit van de ARKit tracking bij
+    bewolking, regen of avondlicht werd niet geëvalueerd. 
+    
+    \item \textbf{Mockdata:} de gebruikte grafcoördinaten zijn handmatige
+    benaderingen op basis van Google Maps, geen officieel ingemeten posities.
+\end{itemize}
