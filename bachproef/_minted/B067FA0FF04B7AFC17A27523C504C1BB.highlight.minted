@@ -1,5 +1,0 @@
-\begin{MintedVerbatim}[commandchars=\\\{\}]
-\PYG{n}{clManager}\PYG{p}{.}\PYG{n}{desiredAccuracy}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{kCLLocationAccuracyBestForNavigation}
-\PYG{n}{clManager}\PYG{p}{.}\PYG{n}{distanceFilter}\PYG{+w}{  }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{1.0}\PYG{+w}{   }\PYG{c+c1}{// update per meter verplaatsing}
-\PYG{n}{clManager}\PYG{p}{.}\PYG{n}{headingFilter}\PYG{+w}{   }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{5.0}\PYG{+w}{   }\PYG{c+c1}{// update per 5 graden draaiing}
-\end{MintedVerbatim}

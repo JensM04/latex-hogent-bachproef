@@ -1,0 +1,4 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{c}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb+bp}{ARWorldTrackingConfiguration}\PYG{p}{()}
+\PYG{n}{c}\PYG{p}{.}\PYG{n}{worldAlignment}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{.}\PYG{n}{gravityAndHeading}
+\end{MintedVerbatim}

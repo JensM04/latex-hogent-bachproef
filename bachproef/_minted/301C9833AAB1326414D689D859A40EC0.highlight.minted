@@ -1,9 +1,0 @@
-\begin{MintedVerbatim}[commandchars=\\\{\}]
-\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{nav}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb+bp}{UINavigationController}\PYG{p}{(}\PYG{n}{rootViewController}\PYG{p}{:}\PYG{+w}{ }\PYG{n}{vc}\PYG{p}{)}
-\PYG{k}{if}\PYG{+w}{ }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nv}{sheet}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{nav}\PYG{p}{.}\PYG{n}{sheetPresentationController}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
-\PYG{+w}{    }\PYG{n}{sheet}\PYG{p}{.}\PYG{n}{detents}\PYG{+w}{               }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{[.}\PYG{n}{medium}\PYG{p}{(),}\PYG{+w}{ }\PYG{p}{.}\PYG{n}{large}\PYG{p}{()]}
-\PYG{+w}{    }\PYG{n}{sheet}\PYG{p}{.}\PYG{n}{prefersGrabberVisible}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{k+kc}{true}
-\PYG{+w}{    }\PYG{n}{sheet}\PYG{p}{.}\PYG{n}{preferredCornerRadius}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mi}{20}
-\PYG{p}{\PYGZcb{}}
-\PYG{n}{present}\PYG{p}{(}\PYG{n}{nav}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{animated}\PYG{p}{:}\PYG{+w}{ }\PYG{k+kc}{true}\PYG{p}{)}
-\end{MintedVerbatim}

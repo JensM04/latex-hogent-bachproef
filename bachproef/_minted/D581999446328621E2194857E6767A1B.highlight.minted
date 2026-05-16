@@ -1,0 +1,6 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n}{trackingLimitedTimer}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{Timer}\PYG{p}{.}\PYG{n}{scheduledTimer}\PYG{p}{(}
+\PYG{n}{withTimeInterval}\PYG{p}{:}\PYG{+w}{ }\PYG{l+m+mf}{3.0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{repeats}\PYG{p}{:}\PYG{+w}{ }\PYG{k+kc}{false}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{p}{[}\PYG{k+kr}{weak}\PYG{+w}{ }\PYG{k+kc}{self}\PYG{p}{]}\PYG{+w}{ }\PYG{k+kc}{\PYGZus{}}\PYG{+w}{ }\PYG{k}{in}
+\PYG{+w}{    }\PYG{k+kc}{self}\PYG{p}{?.}\PYG{n}{showFallbackBanner}\PYG{p}{()}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}
