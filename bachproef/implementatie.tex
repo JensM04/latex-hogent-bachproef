@@ -7,6 +7,7 @@ Dit hoofdstuk beschrijft de technische uitwerking van het proof of concept. De f
 
 De applicatie werd ontwikkeld als een native iOS-applicatie in Swift 5.9, binnen Xcode 15. De keuze voor native iOS is ingegeven door de directe integratie met ARKit, dat toegang vereist tot de \texttt{AVCaptureSession} en alle sensoren van het toestel zonder extra abstractielagen. De voornaamste frameworks zijn ARKit (world tracking), SceneKit (3D-rendering), MapKit (minikaart), CoreLocation (GPS en kompas) en Combine (reactieve statusupdates).
 
+
 De architectuur volgt het Repository-patroon met een strikte scheiding tussen de AR-component, de kaartcomponent, de zoekcomponent en de servicelaag. Dit maakt het mogelijk om de lokale mockdataset in een productieomgeving te vervangen door een live API-aanroep naar WebBGP zonder wijzigingen in de UI-code.
 
 \section{ARKit-sessieconfiguratie en werelduitlijning}
